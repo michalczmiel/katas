@@ -4,4 +4,4 @@
 
 > However, do not alter the Item class or Items property...
 
-- There was a change from plain class to dataclass for better assertion in tests
+Plain class was changed to dataclass for better assertion in tests
