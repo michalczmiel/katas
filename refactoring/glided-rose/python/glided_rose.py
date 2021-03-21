@@ -25,7 +25,7 @@ class Quality:
         return replace(self, value=0)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class DateDays:
     value: int
 
@@ -66,9 +66,10 @@ class BackstagePassItemPolicy(ItemPolicy):
     def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
         new_quality = quality.increase()
 
-        if sell_in.value < 11:
+        if sell_in < DateDays(11):
             new_quality = new_quality.increase()
-        if sell_in.value < 6:
+
+        if sell_in < DateDays(6):
             new_quality = new_quality.increase()
 
         new_sell_in = sell_in.next_day()
@@ -93,7 +94,7 @@ class DefaultItemPolicy(ItemPolicy):
 
 
 class GildedRose:
-    def __init__(self, items):
+    def __init__(self, items: Item):
         self.items = items
 
     def _is_legendary_item(self, item: Item) -> bool:
