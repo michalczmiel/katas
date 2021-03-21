@@ -26,30 +26,34 @@ class Quality:
 
 
 @dataclass(frozen=True)
-class Days:
+class DateDays:
     value: int
 
     def next_day(self) -> "Days":
         value = self.value - 1
         return replace(self, value=value)
 
+    @property
+    def date_passed(self) -> bool:
+        return self.value < 0
+
 
 class ItemPolicy(ABC):
     @classmethod
     @abstractmethod
-    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
         pass
 
 
 class LegendaryItemPolicy(ItemPolicy):
     @classmethod
-    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
         return [quality, sell_in]
 
 
 class AgedCheeseItemPolicy(ItemPolicy):
     @classmethod
-    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
         new_quality = quality.increase()
 
         new_sell_in = sell_in.next_day()
@@ -59,7 +63,7 @@ class AgedCheeseItemPolicy(ItemPolicy):
 
 class BackstagePassItemPolicy(ItemPolicy):
     @classmethod
-    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
         new_quality = quality.increase()
 
         if sell_in.value < 11:
@@ -69,7 +73,7 @@ class BackstagePassItemPolicy(ItemPolicy):
 
         new_sell_in = sell_in.next_day()
 
-        if new_sell_in.value < 0:
+        if new_sell_in.date_passed:
             new_quality = new_quality.reset()
 
         return [new_quality, new_sell_in]
@@ -77,12 +81,12 @@ class BackstagePassItemPolicy(ItemPolicy):
 
 class DefaultItemPolicy(ItemPolicy):
     @classmethod
-    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
         new_quality = quality.decrease()
 
         new_sell_in = sell_in.next_day()
 
-        if new_sell_in.value < 0:
+        if new_sell_in.date_passed:
             new_quality = new_quality.decrease()
 
         return [new_quality, new_sell_in]
@@ -115,7 +119,7 @@ class GildedRose:
         for item in self.items:
             policy = self.get_policy_for_item(item)
             quality = Quality(item.quality)
-            sell_in = Days(item.sell_in)
+            sell_in = DateDays(item.sell_in)
 
             updated_quality, updated_sell_in = policy.update_quality(quality, sell_in)
 
