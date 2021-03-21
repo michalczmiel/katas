@@ -9,58 +9,83 @@ class Item:
     quality: int
 
 
-@dataclass
-class LegendaryItem:
-    item: Item
+@dataclass(frozen=True)
+class Quality:
+    value: int
 
-    def update_quality(self):
+    def increase(self) -> "Quality":
+        value = self.value + 1 if self.value < 50 else self.value
+        return replace(self, value=value)
+
+    def decrease(self) -> "Quality":
+        value = self.value - 1 if self.value > 0 else self.value
+        return replace(self, value=value)
+
+    def reset(self) -> "Quality":
+        return replace(self, value=0)
+
+
+@dataclass(frozen=True)
+class Days:
+    value: int
+
+    def next_day(self) -> "Days":
+        value = self.value - 1
+        return replace(self, value=value)
+
+
+class ItemPolicy(ABC):
+    @classmethod
+    @abstractmethod
+    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
         pass
 
 
-@dataclass
-class AgedCheeseItem:
-    item: Item
-
-    def update_quality(self):
-        if self.item.quality < 50:
-            self.item.quality += 1
-        self.item.sell_in -= 1
+class LegendaryItemPolicy(ItemPolicy):
+    @classmethod
+    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+        return [quality, sell_in]
 
 
-@dataclass
-class BackstagePassItem:
-    item: Item
+class AgedCheeseItemPolicy(ItemPolicy):
+    @classmethod
+    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+        new_quality = quality.increase()
 
-    def update_quality(self):
-        if self.item.quality < 50:
-            self.item.quality = self.item.quality + 1
+        new_sell_in = sell_in.next_day()
 
-            if self.item.sell_in < 11:
-                if self.item.quality < 50:
-                    self.item.quality = self.item.quality + 1
-            if self.item.sell_in < 6:
-                if self.item.quality < 50:
-                    self.item.quality = self.item.quality + 1
-
-        self.item.sell_in = self.item.sell_in - 1
-
-        if self.item.sell_in < 0:
-            self.item.quality = 0
+        return [new_quality, new_sell_in]
 
 
-@dataclass
-class DefaultItem:
-    item: Item
+class BackstagePassItemPolicy(ItemPolicy):
+    @classmethod
+    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+        new_quality = quality.increase()
 
-    def update_quality(self):
-        if self.item.quality > 0:
-            self.item.quality = self.item.quality - 1
+        if sell_in.value < 11:
+            new_quality = new_quality.increase()
+        if sell_in.value < 6:
+            new_quality = new_quality.increase()
 
-        self.item.sell_in = self.item.sell_in - 1
+        new_sell_in = sell_in.next_day()
 
-        if self.item.sell_in < 0:
-            if self.item.quality > 0:
-                self.item.quality = self.item.quality - 1
+        if new_sell_in.value < 0:
+            new_quality = new_quality.reset()
+
+        return [new_quality, new_sell_in]
+
+
+class DefaultItemPolicy(ItemPolicy):
+    @classmethod
+    def update_quality(cls, quality: Quality, sell_in: Days) -> [Quality, Days]:
+        new_quality = quality.decrease()
+
+        new_sell_in = sell_in.next_day()
+
+        if new_sell_in.value < 0:
+            new_quality = new_quality.decrease()
+
+        return [new_quality, new_sell_in]
 
 
 class GildedRose:
@@ -76,13 +101,23 @@ class GildedRose:
     def _is_backstate_pass_item(self, item: Item) -> bool:
         return item.name == "Backstage passes to a TAFKAL80ETC concert"
 
+    def get_policy_for_item(self, item: Item):
+        if self._is_legendary_item(item):
+            return LegendaryItemPolicy
+        elif self._is_aged_cheese_item(item):
+            return AgedCheeseItemPolicy
+        elif self._is_backstate_pass_item(item):
+            return BackstagePassItemPolicy
+        else:
+            return DefaultItemPolicy
+
     def update_quality(self):
         for item in self.items:
-            if self._is_legendary_item(item):
-                LegendaryItem(item).update_quality()
-            elif self._is_aged_cheese_item(item):
-                AgedCheeseItem(item).update_quality()
-            elif self._is_backstate_pass_item(item):
-                BackstagePassItem(item).update_quality()
-            else:
-                DefaultItem(item).update_quality()
+            policy = self.get_policy_for_item(item)
+            quality = Quality(item.quality)
+            sell_in = Days(item.sell_in)
+
+            updated_quality, updated_sell_in = policy.update_quality(quality, sell_in)
+
+            item.quality = updated_quality.value
+            item.sell_in = updated_sell_in.value
