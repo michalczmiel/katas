@@ -93,10 +93,7 @@ class DefaultItemPolicy(ItemPolicy):
         return [new_quality, new_sell_in]
 
 
-class GildedRose:
-    def __init__(self, items: Item):
-        self.items = items
-
+class ItemsCatalog:
     def _is_legendary_item(self, item: Item) -> bool:
         return item.name == "Sulfuras, Hand of Ragnaros"
 
@@ -106,7 +103,7 @@ class GildedRose:
     def _is_backstate_pass_item(self, item: Item) -> bool:
         return item.name == "Backstage passes to a TAFKAL80ETC concert"
 
-    def get_policy_for_item(self, item: Item):
+    def get_policy_for_item(self, item: Item) -> ItemPolicy:
         if self._is_legendary_item(item):
             return LegendaryItemPolicy
         elif self._is_aged_cheese_item(item):
@@ -116,9 +113,15 @@ class GildedRose:
         else:
             return DefaultItemPolicy
 
+
+class GildedRose:
+    def __init__(self, items: Item):
+        self.items = items
+        self._catalog = ItemsCatalog()
+
     def update_quality(self):
         for item in self.items:
-            policy = self.get_policy_for_item(item)
+            policy = self._catalog.get_policy_for_item(item)
             quality = Quality(item.quality)
             sell_in = DateDays(item.sell_in)
 
