@@ -19,7 +19,9 @@ class GildedRoseTest(unittest.TestCase):
             ],
         )
 
-    def test_once_sell_date_has_passed_quality_degrades_twice_as_fast(self):
+    def test_once_sell_date_has_passed_quality_of_normal_item_degrades_twice_as_fast(
+        self,
+    ):
         items = [
             Item(name="+5 Dexterity Vest", sell_in=0, quality=20),
         ]
@@ -198,6 +200,29 @@ class GildedRoseTest(unittest.TestCase):
                     name="Backstage passes to a TAFKAL80ETC concert",
                     sell_in=-2,
                     quality=0,
+                ),
+            ],
+        )
+
+    def test_conjured_items_degrade_in_quality_twice_as_fast(self):
+        items = [
+            Item(name="Conjured Mana Pie", sell_in=10, quality=20),
+            Item(name="Conjured Mana Cookie", sell_in=0, quality=8),
+        ]
+        rose = GildedRose(items)
+        rose.update_quality()
+        self.assertListEqual(
+            rose.items,
+            [
+                Item(
+                    name="Conjured Mana Pie",
+                    sell_in=9,
+                    quality=18,
+                ),
+                Item(
+                    name="Conjured Mana Cookie",
+                    sell_in=-1,
+                    quality=4,
                 ),
             ],
         )

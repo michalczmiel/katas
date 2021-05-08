@@ -39,6 +39,9 @@ class DateDays:
 
 
 class GildedRoseItem(ABC):
+    quality: Quality
+    sell_in: DateDays
+
     @abstractmethod
     def update(self):
         pass
@@ -84,6 +87,21 @@ class BackstagePassItem(GildedRoseItem):
 
 
 @dataclass
+class ConjuredItem(GildedRoseItem):
+    quality: Quality
+    sell_in: DateDays
+
+    def update(self):
+        self.quality = self.quality.decrease()
+        self.quality = self.quality.decrease()
+        self.sell_in = self.sell_in.next_day()
+
+        if self.sell_in.date_passed:
+            self.quality = self.quality.decrease()
+            self.quality = self.quality.decrease()
+
+
+@dataclass
 class NormalItem(GildedRoseItem):
     quality: Quality
     sell_in: DateDays
@@ -106,6 +124,9 @@ class ItemsCatalog:
     def _is_backstate_pass_item(self, item: Item) -> bool:
         return item.name == "Backstage passes to a TAFKAL80ETC concert"
 
+    def _is_conjured_item(self, item: Item) -> bool:
+        return "Conjured" in item.name
+
     def from_item(self, item: Item) -> GildedRoseItem:
         quality = Quality(item.quality)
         sell_in = DateDays(item.sell_in)
@@ -116,6 +137,8 @@ class ItemsCatalog:
             return AgedCheeseItem(quality=quality, sell_in=sell_in)
         elif self._is_backstate_pass_item(item):
             return BackstagePassItem(quality=quality, sell_in=sell_in)
+        elif self._is_conjured_item(item):
+            return ConjuredItem(quality=quality, sell_in=sell_in)
         else:
             return NormalItem(quality=quality, sell_in=sell_in)
 
