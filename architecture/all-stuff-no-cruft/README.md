@@ -6,3 +6,9 @@
 - [ ] Bounded Contexts
 - [ ] Architectural Drivers
 - [ ] C4 Diagrams
+
+### Big Picture Event Storming
+
+**Work in progress**
+
+![](./assets/WIP-big-picture-event-storming.jpg)
