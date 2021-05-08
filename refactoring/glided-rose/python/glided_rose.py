@@ -38,59 +38,62 @@ class DateDays:
         return self.value < 0
 
 
-class ItemPolicy(ABC):
-    @classmethod
+class GildedRoseItem(ABC):
     @abstractmethod
-    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
+    def update(self):
         pass
 
 
-class LegendaryItemPolicy(ItemPolicy):
-    @classmethod
-    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
-        return [quality, sell_in]
+@dataclass
+class LegendaryItem(GildedRoseItem):
+    quality: Quality
+    sell_in: DateDays
+
+    def update(self):
+        pass
 
 
-class AgedCheeseItemPolicy(ItemPolicy):
-    @classmethod
-    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
-        new_quality = quality.increase()
+@dataclass
+class AgedCheeseItem(GildedRoseItem):
+    quality: Quality
+    sell_in: DateDays
 
-        new_sell_in = sell_in.next_day()
-
-        return [new_quality, new_sell_in]
-
-
-class BackstagePassItemPolicy(ItemPolicy):
-    @classmethod
-    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
-        new_quality = quality.increase()
-
-        if sell_in < DateDays(11):
-            new_quality = new_quality.increase()
-
-        if sell_in < DateDays(6):
-            new_quality = new_quality.increase()
-
-        new_sell_in = sell_in.next_day()
-
-        if new_sell_in.date_passed:
-            new_quality = new_quality.reset()
-
-        return [new_quality, new_sell_in]
+    def update(self):
+        self.quality = self.quality.increase()
+        self.sell_in = self.sell_in.next_day()
 
 
-class DefaultItemPolicy(ItemPolicy):
-    @classmethod
-    def update_quality(cls, quality: Quality, sell_in: DateDays) -> [Quality, DateDays]:
-        new_quality = quality.decrease()
+@dataclass
+class BackstagePassItem(GildedRoseItem):
+    quality: Quality
+    sell_in: DateDays
 
-        new_sell_in = sell_in.next_day()
+    def update(self):
+        self.quality = self.quality.increase()
 
-        if new_sell_in.date_passed:
-            new_quality = new_quality.decrease()
+        if self.sell_in < DateDays(11):
+            self.quality = self.quality.increase()
 
-        return [new_quality, new_sell_in]
+        if self.sell_in < DateDays(6):
+            self.quality = self.quality.increase()
+
+        self.sell_in = self.sell_in.next_day()
+
+        if self.sell_in.date_passed:
+            self.quality = self.quality.reset()
+
+
+@dataclass
+class NormalItem(GildedRoseItem):
+    quality: Quality
+    sell_in: DateDays
+
+    def update(self):
+        self.quality = self.quality.decrease()
+        self.sell_in = self.sell_in.next_day()
+
+        if self.sell_in.date_passed:
+            self.quality = self.quality.decrease()
 
 
 class ItemsCatalog:
@@ -103,15 +106,18 @@ class ItemsCatalog:
     def _is_backstate_pass_item(self, item: Item) -> bool:
         return item.name == "Backstage passes to a TAFKAL80ETC concert"
 
-    def get_policy_for_item(self, item: Item) -> ItemPolicy:
+    def from_item(self, item: Item) -> GildedRoseItem:
+        quality = Quality(item.quality)
+        sell_in = DateDays(item.sell_in)
+
         if self._is_legendary_item(item):
-            return LegendaryItemPolicy
+            return LegendaryItem(quality=quality, sell_in=sell_in)
         elif self._is_aged_cheese_item(item):
-            return AgedCheeseItemPolicy
+            return AgedCheeseItem(quality=quality, sell_in=sell_in)
         elif self._is_backstate_pass_item(item):
-            return BackstagePassItemPolicy
+            return BackstagePassItem(quality=quality, sell_in=sell_in)
         else:
-            return DefaultItemPolicy
+            return NormalItem(quality=quality, sell_in=sell_in)
 
 
 class GildedRose:
@@ -121,11 +127,9 @@ class GildedRose:
 
     def update_quality(self):
         for item in self.items:
-            policy = self._catalog.get_policy_for_item(item)
-            quality = Quality(item.quality)
-            sell_in = DateDays(item.sell_in)
+            glided_rose_item = self._catalog.from_item(item)
 
-            updated_quality, updated_sell_in = policy.update_quality(quality, sell_in)
+            glided_rose_item.update()
 
-            item.quality = updated_quality.value
-            item.sell_in = updated_sell_in.value
+            item.quality = glided_rose_item.quality.value
+            item.sell_in = glided_rose_item.sell_in.value
