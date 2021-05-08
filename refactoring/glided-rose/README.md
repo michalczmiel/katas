@@ -2,4 +2,4 @@
 
 ## Implementations
 
-- [Python](./python/README.md)
+- [Python](./python/)
