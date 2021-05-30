@@ -1,7 +1,23 @@
 import math
+from typing import TypedDict, List, Dict
 
 
-def statement(invoice, plays):
+class Performance(TypedDict):
+    playID: str
+    audience: int
+
+
+class Invoice(TypedDict):
+    customer: str
+    performances: List[Performance]
+
+
+class Play(TypedDict):
+    name: str
+    type: str
+
+
+def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
     total_amount = 0
     volume_credits = 0
     result = f'Statement for {invoice["customer"]}\n'
