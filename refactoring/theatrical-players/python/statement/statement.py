@@ -17,13 +17,33 @@ class Play(TypedDict):
     type: str
 
 
+class PlaySummary(TypedDict):
+    name: str
+    amount: int
+    audience: int
+
+
+def render_statemnet(
+    customer: str, total_amount: int, volume_credits: int, summaries: List[PlaySummary]
+) -> str:
+    result = f"Statement for {customer}\n"
+
+    def format_as_dollars(amount) -> str:
+        return f"${amount:0,.2f}"
+
+    for summary in summaries:
+        result += f' {summary["name"]}: {format_as_dollars(summary["amount"]/100)} ({summary["audience"]} seats)\n'
+
+    result += f"Amount owed is {format_as_dollars(total_amount/100)}\n"
+    result += f"You earned {volume_credits} credits\n"
+
+    return result
+
+
 def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
     total_amount = 0
     volume_credits = 0
-    result = f'Statement for {invoice["customer"]}\n'
-
-    def format_as_dollars(amount):
-        return f"${amount:0,.2f}"
+    summaries = []
 
     for perf in invoice["performances"]:
         play = plays[perf["playID"]]
@@ -46,10 +66,22 @@ def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
         # add extra credit for every ten comedy attendees
         if "comedy" == play["type"]:
             volume_credits += math.floor(perf["audience"] / 5)
-        # print line for this order
-        result += f' {play["name"]}: {format_as_dollars(this_amount/100)} ({perf["audience"]} seats)\n'
+
+        summaries.append(
+            {
+                "name": play["name"],
+                "amount": this_amount,
+                "audience": perf["audience"],
+            }
+        )
+
         total_amount += this_amount
 
-    result += f"Amount owed is {format_as_dollars(total_amount/100)}\n"
-    result += f"You earned {volume_credits} credits\n"
+    result = render_statemnet(
+        invoice["customer"],
+        total_amount,
+        volume_credits,
+        summaries,
+    )
+
     return result
