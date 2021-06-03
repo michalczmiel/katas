@@ -25,16 +25,34 @@ class PlaySummary(TypedDict):
     audience: int
 
 
+class CompletedPlay(ABC):
+    name: str
+    audience: int
+
+    @property
+    @abstractmethod
+    def amount(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def volume_credits(self) -> int:
+        pass
+
+
 def render_statement(
-    customer: str, total_amount: int, volume_credits: int, summaries: List[PlaySummary]
+    customer: str,
+    total_amount: int,
+    volume_credits: int,
+    play_list: List[CompletedPlay],
 ) -> str:
     result = f"Statement for {customer}\n"
 
     def format_as_dollars(amount) -> str:
         return f"${amount:0,.2f}"
 
-    for summary in summaries:
-        result += f' {summary["name"]}: {format_as_dollars(summary["amount"]/100)} ({summary["audience"]} seats)\n'
+    for play in play_list:
+        result += f" {play.name}: {format_as_dollars(play.amount/100)} ({play.audience} seats)\n"
 
     result += f"Amount owed is {format_as_dollars(total_amount/100)}\n"
     result += f"You earned {volume_credits} credits\n"
@@ -42,20 +60,9 @@ def render_statement(
     return result
 
 
-class CompletedPlay(ABC):
-    @property
-    @abstractmethod
-    def audience(self) -> int:
-        pass
-
-    @property
-    @abstractmethod
-    def amount(self) -> int:
-        pass
-
-
 @dataclass(frozen=True)
 class ComedyCompletedPlay(CompletedPlay):
+    name: str
     audience: int
 
     @property
@@ -67,9 +74,17 @@ class ComedyCompletedPlay(CompletedPlay):
         this_amount += 300 * self.audience
         return this_amount
 
+    @property
+    def volume_credits(self) -> int:
+        credits = max(self.audience - 30, 0)
+        # add extra credit for every ten comedy attendees
+        credits += math.floor(self.audience / 5)
+        return credits
+
 
 @dataclass(frozen=True)
 class TragedyCompletedPlay(CompletedPlay):
+    name: str
     audience: int
 
     @property
@@ -79,12 +94,17 @@ class TragedyCompletedPlay(CompletedPlay):
             this_amount += 1000 * (self.audience - 30)
         return this_amount
 
+    @property
+    def volume_credits(self) -> int:
+        credits = max(self.audience - 30, 0)
+        return credits
+
 
 def map_to_completed_play(play: Play, performance: Performance) -> CompletedPlay:
     if play["type"] == "tragedy":
-        return TragedyCompletedPlay(audience=performance["audience"])
+        return TragedyCompletedPlay(name=play["name"], audience=performance["audience"])
     elif play["type"] == "comedy":
-        return ComedyCompletedPlay(audience=performance["audience"])
+        return ComedyCompletedPlay(name=play["name"], audience=performance["audience"])
     else:
         raise ValueError(f'unknown type: {play["type"]}')
 
@@ -92,34 +112,23 @@ def map_to_completed_play(play: Play, performance: Performance) -> CompletedPlay
 def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
     total_amount = 0
     volume_credits = 0
-    summaries: List[PlaySummary] = []
+    play_list: List[CompletedPlay] = []
 
     for perf in invoice["performances"]:
         play = plays[perf["playID"]]
 
         completed_play = map_to_completed_play(play, perf)
 
-        # add volume credits
-        volume_credits += max(perf["audience"] - 30, 0)
-        # add extra credit for every ten comedy attendees
-        if "comedy" == play["type"]:
-            volume_credits += math.floor(perf["audience"] / 5)
-
-        summaries.append(
-            {
-                "name": play["name"],
-                "amount": completed_play.amount,
-                "audience": completed_play.audience,
-            }
-        )
-
+        volume_credits += completed_play.volume_credits
         total_amount += completed_play.amount
+
+        play_list.append(completed_play)
 
     result = render_statement(
         invoice["customer"],
         total_amount,
         volume_credits,
-        summaries,
+        play_list,
     )
 
     return result
