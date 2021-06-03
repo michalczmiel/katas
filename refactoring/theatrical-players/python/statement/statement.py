@@ -23,7 +23,7 @@ class PlaySummary(TypedDict):
     audience: int
 
 
-def render_statemnet(
+def render_statement(
     customer: str, total_amount: int, volume_credits: int, summaries: List[PlaySummary]
 ) -> str:
     result = f"Statement for {customer}\n"
@@ -43,7 +43,7 @@ def render_statemnet(
 def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
     total_amount = 0
     volume_credits = 0
-    summaries = []
+    summaries: List[PlaySummary] = []
 
     for perf in invoice["performances"]:
         play = plays[perf["playID"]]
@@ -77,7 +77,7 @@ def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
 
         total_amount += this_amount
 
-    result = render_statemnet(
+    result = render_statement(
         invoice["customer"],
         total_amount,
         volume_credits,
