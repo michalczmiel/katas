@@ -40,18 +40,19 @@ class CompletedPlay(ABC):
         pass
 
 
+def format_as_dollars(amount: float) -> str:
+    return f"${amount:0,.2f}"
+
+
 def render_statement(
     customer: str,
     total_amount: int,
     volume_credits: int,
-    play_list: List[CompletedPlay],
+    completed_plays: List[CompletedPlay],
 ) -> str:
     result = f"Statement for {customer}\n"
 
-    def format_as_dollars(amount) -> str:
-        return f"${amount:0,.2f}"
-
-    for play in play_list:
+    for play in completed_plays:
         result += f" {play.name}: {format_as_dollars(play.amount/100)} ({play.audience} seats)\n"
 
     result += f"Amount owed is {format_as_dollars(total_amount/100)}\n"
@@ -112,7 +113,7 @@ def map_to_completed_play(play: Play, performance: Performance) -> CompletedPlay
 def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
     total_amount = 0
     volume_credits = 0
-    play_list: List[CompletedPlay] = []
+    completed_plays: List[CompletedPlay] = []
 
     for perf in invoice["performances"]:
         play = plays[perf["playID"]]
@@ -122,13 +123,13 @@ def statement(invoice: Invoice, plays: Dict[str, Play]) -> str:
         volume_credits += completed_play.volume_credits
         total_amount += completed_play.amount
 
-        play_list.append(completed_play)
+        completed_plays.append(completed_play)
 
     result = render_statement(
-        invoice["customer"],
-        total_amount,
-        volume_credits,
-        play_list,
+        customer=invoice["customer"],
+        total_amount=total_amount,
+        volume_credits=volume_credits,
+        completed_plays=completed_plays,
     )
 
     return result
