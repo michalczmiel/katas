@@ -10,7 +10,7 @@ Person(speaker, "Speaker")
 Person(organizer, "Organizer")
 Person(atendee, "Atendee")
 
-System(conference_system, "Conference System", "Allows atendees to view speaking schedule, rate talks, get updates on schedule changes and view slides")
+System(conference_system, "Conference System", "Mnagement system for running a conference")
 
 System_Ext(email_system, "E-Mail System")
 System_Ext(sms_system, "SMS System")
@@ -18,6 +18,7 @@ System_Ext(phone_system, "Phone System")
 
 Rel(atendee, conference_system, "Views speaking schedule, rates talks, gets updates on schedule changes and views slides using")
 Rel(organizer, conference_system, "Configures branding and registers schedule changes using")
+Rel(speaker, conference_system, "Manages talks")
 
 Rel(conference_system, email_system, "Sends e-mail using")
 Rel(conference_system, sms_system, "Sends SMS using")
