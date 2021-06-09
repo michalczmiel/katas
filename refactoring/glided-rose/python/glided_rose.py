@@ -29,7 +29,7 @@ class Quality:
 class DateDays:
     value: int
 
-    def next_day(self) -> "Days":
+    def next_day(self) -> "DateDays":
         value = self.value - 1
         return replace(self, value=value)
 
