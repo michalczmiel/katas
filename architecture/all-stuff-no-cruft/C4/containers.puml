@@ -1,0 +1,42 @@
+@startuml System
+
+!pragma ratio 0.7
+skinparam TitleFontSize 32
+title Conference System - Containers
+
+!include deps.puml
+
+Person(speaker, "Speaker")
+Person(organizer, "Organizer")
+Person(atendee, "Atendee")
+
+System_Boundary(c1, "Conference System") {
+  Container(api, "API Server", "", "")
+  Container(frontend, "Frontend", "", "")
+  Container(admin_frontend, "Admin Frontend", "", "")
+  ContainerDb(db, "Database", "", "")
+  ContainerDb(file_storage, "File Storage", "")
+}
+
+System_Ext(email_system, "E-Mail System")
+System_Ext(sms_system, "SMS System")
+System_Ext(phone_system, "Phone System")
+
+Rel(admin_frontend, api, "Fetches data and makes calls to")
+Rel(frontend, api, "Fetches data and makes calls to")
+Rel(api, db, "Reads from and writes to")
+Rel(api, file_storage, "Saves and reads files from")
+
+Rel(atendee, frontend, "Views speaking schedule, rates talks, gets updates on schedule changes and views slides using")
+Rel(speaker, frontend, "Manages talks")
+Rel(organizer, admin_frontend, "Configures branding and registers schedule changes using")
+
+Rel(api, email_system, "Sends e-mail using")
+Rel(api, sms_system, "Sends SMS using")
+Rel(api, phone_system, "Makes calls using")
+
+Rel(email_system, atendee, "Sends e-mails to")
+Rel(sms_system, atendee, "Sends SMS to")
+Rel(phone_system, atendee, "Makes calls to")
+
+@enduml
