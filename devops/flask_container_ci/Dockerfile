@@ -16,4 +16,8 @@ COPY app .
 
 ENV FLASK_APP=app/main.py
 
+# Run as non-root user
+RUN useradd --create-home appuser
+USER appuser
+
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
