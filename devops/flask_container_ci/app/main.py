@@ -71,10 +71,5 @@ def pretty_json(arg):
     return response
 
 
-def create_test_app():
-    app = Flask(__name__)
-    return app
-
-
 if __name__ == "__main__":
     app.run(port=5000)
