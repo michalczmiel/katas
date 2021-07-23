@@ -58,6 +58,11 @@ def user_something(username):
     raise NotImplementedError()
 
 
+@app.route("/health", methods=['GET'])
+def health():
+    return {"status": "ok"}
+
+
 def pretty_json(arg):
     response = make_response(json.dumps(arg, sort_keys=True, indent=4))
     response.headers['Content-type'] = "application/json"

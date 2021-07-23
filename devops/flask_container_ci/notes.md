@@ -4,3 +4,4 @@
 - Removed id from specific user endpoint
 - Renamed resources property in main page
 - Conternized application
+- Added health endpoint
