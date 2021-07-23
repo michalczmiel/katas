@@ -7,7 +7,9 @@ CONTAINER_PORT = 5000
 HEALTH_ENDPOINT = f"http://127.0.0.1:{CONTAINER_PORT}/health"
 IMAGE_NAME = "app"
 
-check_call(f"docker run --rm --name={CONTAINER_NAME} -p {CONTAINER_PORT}:{CONTAINER_PORT} -d {IMAGE_NAME}".split())
+check_call(
+    f"docker run --rm --name={CONTAINER_NAME} -p {CONTAINER_PORT}:{CONTAINER_PORT} -d {IMAGE_NAME}".split()
+)
 
 # wait until server is ready
 time.sleep(5)
