@@ -1,11 +1,28 @@
 #!/usr/bin/env python
 # coding=utf-8
+import json
+from dataclasses import dataclass, asdict
+from typing import TypedDict
 
 from flask import Flask
 from flask import make_response
-
-import json
 from werkzeug.exceptions import NotFound
+
+
+class User(TypedDict):
+    id: str
+    name: str
+    description: str
+
+
+@dataclass
+class UserOutputDto:
+    name: str
+    description: str
+
+    @classmethod
+    def from_dict(cls, user: User) -> "UserOutputDto":
+        return cls(name=user["name"], description=user["description"])
 
 
 app = Flask(__name__)
@@ -35,7 +52,7 @@ def user_data(username):
     if username not in users:
         raise NotFound
 
-    return pretty_json(users[username])
+    return asdict(UserOutputDto.from_dict(users[username]))
 
 
 @app.route("/users/<username>/something", methods=['GET'])
