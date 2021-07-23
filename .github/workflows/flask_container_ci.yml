@@ -14,7 +14,7 @@ defaults:
     working-directory: devops/flask_container_ci
 
 jobs:
-  validate:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,16 @@ jobs:
     - name: Test
       run: |
         python3 tests.py
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
     - name: Build
       run: |
         ./scripts/build.sh
+    - name: Smoke test
+      run: |
+        python3 smoketest.py
+
