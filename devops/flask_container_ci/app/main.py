@@ -29,7 +29,7 @@ with open("./users.json", "r") as f:
     users = json.load(f)
 
 
-@app.route("/", methods=["GET"])
+@app.get("/")
 def index():
     return pretty_json(
         {
@@ -42,12 +42,12 @@ def index():
     )
 
 
-@app.route("/users", methods=["GET"])
+@app.get("/users")
 def all_users():
     return pretty_json(users)
 
 
-@app.route("/users/<username>", methods=["GET"])
+@app.get("/users/<username>")
 def user_data(username):
     if username not in users:
         raise NotFound
@@ -55,12 +55,12 @@ def user_data(username):
     return asdict(UserOutputDto.from_dict(users[username]))
 
 
-@app.route("/users/<username>/something", methods=["GET"])
+@app.get("/users/<username>/something")
 def user_something(username):
     raise NotImplementedError()
 
 
-@app.route("/health", methods=["GET"])
+@app.get("/health")
 def health():
     return {"status": "ok"}
 
