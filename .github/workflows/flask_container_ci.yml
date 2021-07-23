@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - "devops/flask_container_ci/**"
+      - '.github/workflows/**'
 
 
 defaults:
