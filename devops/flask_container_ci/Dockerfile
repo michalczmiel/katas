@@ -12,12 +12,12 @@ RUN pip install -r requirements.txt
 
 COPY users.json .
 
-COPY app .
+COPY app app/
 
-ENV FLASK_APP=app/main.py
+COPY server.py .
 
 # Run as non-root user
 RUN useradd --create-home appuser
 USER appuser
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+CMD [ "python3", "server.py"]

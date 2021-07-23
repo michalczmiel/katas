@@ -27,9 +27,9 @@ def load_users() -> List[User]:
         return json.load(f)
 
 
-app = Flask(__name__)
+users = load_users()
 
-users = load_users
+app = Flask(__name__)
 
 
 @app.get("/")
@@ -57,14 +57,10 @@ def user_data(username: str):
 
 
 @app.get("/users/<username>/something")
-def user_something(username):
+def user_something(username: str):
     raise NotImplementedError()
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-
-if __name__ == "__main__":
-    app.run(port=5000)
