@@ -1,0 +1,32 @@
+name: Flask Container CI
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - main
+    paths:
+      - "devops/flask_container_ci/**"
+
+
+defaults:
+  run:
+    working-directory: devops/flask_container_ci
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Test
+      run: |
+        python3 tests.py
