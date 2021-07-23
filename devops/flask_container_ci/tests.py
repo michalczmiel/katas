@@ -27,6 +27,12 @@ class TestCase(unittest.TestCase):
             "name":"Geralt of Rivia"
         })
 
+    def test_health_page(self):
+        response = self.app.get('/health', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {
+            "status": "ok"
+        })
 
 
 if __name__ == '__main__':
