@@ -19,6 +19,15 @@ class TestCase(unittest.TestCase):
         response = self.app.get('/users', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
+    def test_specific_user(self):
+        response = self.app.get('/users/geralt', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {
+            "description": "Traveling monster slayer for hire",
+            "name":"Geralt of Rivia"
+        })
+
+
 
 if __name__ == '__main__':
     unittest.main()
