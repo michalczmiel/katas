@@ -13,7 +13,10 @@ class TestCase(unittest.TestCase):
 
     def test_main_page(self):
         response = self.app.get('/', follow_redirects=True)
+        data = response.json
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["current_uri"], "/")
+        self.assertIn("resources_uris", data)
 
     def test_users_page(self):
         response = self.app.get('/users', follow_redirects=True)

@@ -34,7 +34,7 @@ with open("./users.json", "r") as f:
 @app.route("/", methods=['GET'])
 def index():
     return pretty_json({
-        "resources": {
+        "resources_uris": {
             "users": "/users",
             "user": "/users/<username>",
         },
