@@ -2,4 +2,6 @@
 
 set -euo pipefail
 
-docker build -t app:latest .
+IMAGE_NAME=app
+
+docker build -t "$IMAGE_NAME:latest" .
