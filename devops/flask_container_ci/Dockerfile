@@ -20,4 +20,4 @@ COPY server.py .
 RUN useradd --create-home appuser
 USER appuser
 
-CMD [ "python3", "server.py"]
+ENTRYPOINT [ "python3", "server.py"]
