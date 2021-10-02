@@ -16,6 +16,9 @@ class StringCalculatorTestCase(unittest.TestCase):
     def test_returns_sum_if_multiple_numbers_are_given(self):
         self.assertEqual(StringCalculator().add("1,2,3,4"), 10)
 
+    def test_returns_sum_if_delimiter_is_also_new_line(self):
+        self.assertEqual(StringCalculator().add("1\n2,3"), 6)
+
 
 if __name__ == "__main__":
     unittest.main()
