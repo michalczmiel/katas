@@ -29,7 +29,7 @@ jobs:
         pip install -r requirements.txt
     - name: Test
       run: |
-        python3 tests.py
+        pytest
 
   build:
     runs-on: ubuntu-latest
