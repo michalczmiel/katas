@@ -22,6 +22,11 @@ class StringCalculatorTestCase(unittest.TestCase):
     def test_returns_sum_if_delimiter_is_changed(self):
         self.assertEqual(StringCalculator().add("//;\n1;2"), 3)
 
+    def test_throws_error_when_negative_number_is_given(self):
+        with self.assertRaises(Exception) as context:
+            StringCalculator().add("//;\n1;-2")
+        self.assertEqual("negatives not allowed", str(context.exception))
+
 
 if __name__ == "__main__":
     unittest.main()
