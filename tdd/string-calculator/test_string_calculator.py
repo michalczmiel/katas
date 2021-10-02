@@ -36,6 +36,8 @@ class StringCalculatorTestCase(unittest.TestCase):
         self.assertEqual(StringCalculator().add("2,1000"), 1002)
         self.assertEqual(StringCalculator().add("2,1001"), 2)
 
+    def test_returns_sum_if_any_length_delimiter_is_changed(self):
+        self.assertEqual(StringCalculator().add("//[***]\n1***2***3"), 6)
 
 
 if __name__ == "__main__":
