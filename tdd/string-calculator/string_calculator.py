@@ -8,19 +8,18 @@ class StringCalculator:
         self._max_big_number: int = 1000
         self._delimeter_change_chars: str = "//"
 
-    def _parse_raw_numbers(self, numbers: str) -> Tuple[str, Optional[str]]:
+    def _parse_raw_numbers(self, numbers: str) -> Tuple[str, List[str]]:
         if not numbers.startswith(self._delimeter_change_chars):
-            return numbers, None
+            return numbers, []
 
         delimiter_part, numbers_part = numbers.split("\n")
 
         if "[" not in delimiter_part and "]" not in delimiter_part:
             custom_delimiter = delimiter_part[len(self._delimeter_change_chars) :]
-            return numbers_part, custom_delimiter
+            return numbers_part, [custom_delimiter]
 
-        found_delimiter = re.findall(r"\[(.*?)\]", delimiter_part)
-        custom_delimiter = found_delimiter[0]
-        return numbers_part, custom_delimiter
+        custom_delimiters = re.findall(r"\[(.*?)\]", delimiter_part)
+        return numbers_part, custom_delimiters
 
     def _assert_no_negative_numbers(self, numbers: Iterable[int]) -> None:
         negative_numbers = [str(number) for number in numbers if number < 0]
@@ -36,12 +35,12 @@ class StringCalculator:
         return [number for number in numbers if number <= self._max_big_number]
 
     def _split_numbers(
-        self, raw_numbers: str, custom_delimiter: Optional[str]
+        self, raw_numbers: str, custom_delimiters: List[str]
     ) -> List[int]:
         numbers = raw_numbers
-        delimiters = "|".join(self._default_delimiters)
-        if custom_delimiter:
+        for custom_delimiter in custom_delimiters:
             numbers = numbers.replace(custom_delimiter, self._default_delimiters[0])
+        delimiters = "|".join(self._default_delimiters)
         numbers = re.split(delimiters, numbers)
         numbers = [int(number) for number in numbers]
         return numbers
@@ -49,8 +48,8 @@ class StringCalculator:
     def add(self, numbers: str) -> int:
         if not numbers:
             return 0
-        numbers, custom_delimiter = self._parse_raw_numbers(numbers)
-        numbers = self._split_numbers(numbers, custom_delimiter)
+        numbers, custom_delimiters = self._parse_raw_numbers(numbers)
+        numbers = self._split_numbers(numbers, custom_delimiters)
         numbers = self._ignore_big_numbers(numbers)
         self._assert_no_negative_numbers(numbers)
         return sum(numbers)
