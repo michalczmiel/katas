@@ -5,6 +5,7 @@ from typing import Iterable, List, Optional, Tuple
 class StringCalculator:
     def __init__(self) -> None:
         self._default_delimiters: Tuple[str] = (",", "\n")
+        self._max_big_number: int = 1000
 
     def _get_custom_delimiter(self, numbers: str) -> Optional[str]:
         if not numbers.startswith("//"):
@@ -21,7 +22,7 @@ class StringCalculator:
         raise Exception(f"negatives not allowed, but found {', '.join(negative_numbers)}")
 
     def _ignore_big_numbers(self, numbers: List[int]) -> List[int]:
-        return [number for number in numbers if number <= 1000]
+        return [number for number in numbers if number <= self._max_big_number]
 
     def add(self, numbers: str) -> int:
         if not numbers:
