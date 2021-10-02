@@ -7,11 +7,18 @@ class StringCalculator:
         self._default_delimiters: Tuple[str] = (",", "\n")
         self._max_big_number: int = 1000
 
-    def _get_custom_delimiter(self, numbers: str) -> Optional[str]:
+    def _parse_raw_numbers(self, numbers: str) -> Tuple[str, Optional[str]]:
         if not numbers.startswith("//"):
-            return
-        custom_delimiter = numbers.split("\n")[0][2]
-        return custom_delimiter
+            return numbers, None
+        delimiter_part, numbers_part = numbers.split("\n")
+
+        if "[" not in delimiter_part and "]" not in delimiter_part:
+            custom_delimiter = delimiter_part[2:]
+            return numbers_part, custom_delimiter
+
+        found_delimiter = re.findall(r"\[(.*?)\]", delimiter_part)
+        custom_delimiter = found_delimiter[0]
+        return numbers_part, custom_delimiter
 
     def _assert_no_negative_numbers(self, numbers: Iterable[int]) -> None:
         negative_numbers = [str(number) for number in numbers if number < 0]
@@ -32,8 +39,7 @@ class StringCalculator:
         numbers = raw_numbers
         delimiters = "|".join(self._default_delimiters)
         if custom_delimiter:
-            numbers = raw_numbers[4:]
-            delimiters += f"|{custom_delimiter}"
+            numbers = numbers.replace(custom_delimiter, self._default_delimiters[0])
         numbers = re.split(delimiters, numbers)
         numbers = [int(number) for number in numbers]
         return numbers
@@ -41,7 +47,7 @@ class StringCalculator:
     def add(self, numbers: str) -> int:
         if not numbers:
             return 0
-        custom_delimiter = self._get_custom_delimiter(numbers)
+        numbers, custom_delimiter = self._parse_raw_numbers(numbers)
         numbers = self._split_numbers(numbers, custom_delimiter)
         numbers = self._ignore_big_numbers(numbers)
         self._assert_no_negative_numbers(numbers)
