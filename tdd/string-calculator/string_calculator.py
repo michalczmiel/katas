@@ -6,14 +6,16 @@ class StringCalculator:
     def __init__(self) -> None:
         self._default_delimiters: Tuple[str] = (",", "\n")
         self._max_big_number: int = 1000
+        self._delimeter_change_chars: str = "//"
 
     def _parse_raw_numbers(self, numbers: str) -> Tuple[str, Optional[str]]:
-        if not numbers.startswith("//"):
+        if not numbers.startswith(self._delimeter_change_chars):
             return numbers, None
+
         delimiter_part, numbers_part = numbers.split("\n")
 
         if "[" not in delimiter_part and "]" not in delimiter_part:
-            custom_delimiter = delimiter_part[2:]
+            custom_delimiter = delimiter_part[len(self._delimeter_change_chars) :]
             return numbers_part, custom_delimiter
 
         found_delimiter = re.findall(r"\[(.*?)\]", delimiter_part)
