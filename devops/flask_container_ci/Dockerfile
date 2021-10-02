@@ -14,10 +14,10 @@ COPY users.json .
 
 COPY app app/
 
-COPY server.py .
+COPY scripts/entrypoint.sh .
 
 # Run as non-root user
 RUN useradd --create-home appuser
 USER appuser
 
-ENTRYPOINT [ "python3", "server.py"]
+ENTRYPOINT [ "./entrypoint.sh" ]

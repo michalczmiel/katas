@@ -12,3 +12,4 @@
 - Formatted code using black
 - Refactored app tests to pytest
 - Create config object
+- Use gunicorn as WSGI server for production
