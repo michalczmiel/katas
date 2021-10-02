@@ -12,9 +12,13 @@ class StringCalculator:
         custom_delimiter = numbers.split("\n")[0][2]
         return custom_delimiter
 
-    def _assert_no_negative_number(self, numbers: Iterable[int]) -> None:
-        if any(number < 0 for number in numbers):
+    def _assert_no_negative_numbers(self, numbers: Iterable[int]) -> None:
+        negative_numbers = [str(number) for number in numbers if number < 0]
+        if not negative_numbers:
+            return
+        elif len(negative_numbers) == 1:
             raise Exception("negatives not allowed")
+        raise Exception(f"negatives not allowed, but found {', '.join(negative_numbers)}")
 
     def add(self, numbers: str) -> int:
         if not numbers:
@@ -26,5 +30,5 @@ class StringCalculator:
             delimiters += f"|{custom_delimiter}"
         numbers = re.split(delimiters, numbers)
         numbers = [int(number) for number in numbers]
-        self._assert_no_negative_number(numbers)
+        self._assert_no_negative_numbers(numbers)
         return sum(numbers)
