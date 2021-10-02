@@ -8,11 +8,11 @@ class StringCalculator:
         self._max_big_number: int = 1000
         self._delimeter_change_chars: str = "//"
 
-    def _parse_raw_numbers(self, numbers: str) -> Tuple[str, List[str]]:
-        if not numbers.startswith(self._delimeter_change_chars):
-            return numbers, []
+    def _parse_raw_numbers(self, raw_numbers: str) -> Tuple[str, List[str]]:
+        if not raw_numbers.startswith(self._delimeter_change_chars):
+            return raw_numbers, []
 
-        delimiter_part, numbers_part = numbers.split("\n")
+        delimiter_part, numbers_part = raw_numbers.split("\n")
 
         if "[" not in delimiter_part and "]" not in delimiter_part:
             custom_delimiter = delimiter_part[len(self._delimeter_change_chars) :]
@@ -45,10 +45,10 @@ class StringCalculator:
         numbers = [int(number) for number in numbers]
         return numbers
 
-    def add(self, numbers: str) -> int:
-        if not numbers:
+    def add(self, raw_numbers: str) -> int:
+        if not raw_numbers:
             return 0
-        numbers, custom_delimiters = self._parse_raw_numbers(numbers)
+        numbers, custom_delimiters = self._parse_raw_numbers(raw_numbers)
         numbers = self._split_numbers(numbers, custom_delimiters)
         numbers = self._ignore_big_numbers(numbers)
         self._assert_no_negative_numbers(numbers)
