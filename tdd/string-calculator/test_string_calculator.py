@@ -13,6 +13,9 @@ class StringCalculatorTestCase(unittest.TestCase):
     def test_returns_sum_if_two_numbers_are_given(self):
         self.assertEqual(StringCalculator().add("1,2"), 3)
 
+    def test_returns_sum_if_multiple_numbers_are_given(self):
+        self.assertEqual(StringCalculator().add("1,2,3,4"), 10)
+
 
 if __name__ == "__main__":
     unittest.main()
