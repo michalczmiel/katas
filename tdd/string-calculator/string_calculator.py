@@ -19,21 +19,30 @@ class StringCalculator:
             return
         elif len(negative_numbers) == 1:
             raise Exception("negatives not allowed")
-        raise Exception(f"negatives not allowed, but found {', '.join(negative_numbers)}")
+        raise Exception(
+            f"negatives not allowed, but found {', '.join(negative_numbers)}"
+        )
 
     def _ignore_big_numbers(self, numbers: List[int]) -> List[int]:
         return [number for number in numbers if number <= self._max_big_number]
+
+    def _split_numbers(
+        self, raw_numbers: str, custom_delimiter: Optional[str]
+    ) -> List[int]:
+        numbers = raw_numbers
+        delimiters = "|".join(self._default_delimiters)
+        if custom_delimiter:
+            numbers = raw_numbers[4:]
+            delimiters += f"|{custom_delimiter}"
+        numbers = re.split(delimiters, numbers)
+        numbers = [int(number) for number in numbers]
+        return numbers
 
     def add(self, numbers: str) -> int:
         if not numbers:
             return 0
         custom_delimiter = self._get_custom_delimiter(numbers)
-        delimiters = "|".join(self._default_delimiters)
-        if custom_delimiter:
-            numbers = numbers[4:]
-            delimiters += f"|{custom_delimiter}"
-        numbers = re.split(delimiters, numbers)
-        numbers = [int(number) for number in numbers]
+        numbers = self._split_numbers(numbers, custom_delimiter)
         numbers = self._ignore_big_numbers(numbers)
         self._assert_no_negative_numbers(numbers)
         return sum(numbers)
