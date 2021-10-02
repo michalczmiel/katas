@@ -10,3 +10,4 @@
 - Added smoke test for container
 - Python Dockerfile best practices and smoke test starter code taken from great book and articles at https://pythonspeed.com/
 - Formatted code using black
+- Refactored app tests to pytest

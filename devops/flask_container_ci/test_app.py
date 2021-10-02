@@ -1,39 +1,41 @@
-import unittest
+import pytest
 
-from app import main
-
-
-class TestCase(unittest.TestCase):
-    def setUp(self):
-        self.app = main.app.test_client()
-
-    def test_main_page(self):
-        response = self.app.get("/", follow_redirects=True)
-        data = response.json
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["current_uri"], "/")
-        self.assertIn("resources_uris", data)
-
-    def test_users_page(self):
-        response = self.app.get("/users", follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-
-    def test_specific_user(self):
-        response = self.app.get("/users/geralt", follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.json,
-            {
-                "description": "Traveling monster slayer for hire",
-                "name": "Geralt of Rivia",
-            },
-        )
-
-    def test_health_page(self):
-        response = self.app.get("/health", follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, {"status": "ok"})
+from app.main import app
 
 
-if __name__ == "__main__":
-    unittest.main()
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+
+def test_main_page(client):
+    response = client.get("/", follow_redirects=True)
+    data = response.json
+    assert response.status_code == 200
+    assert data["current_uri"] == "/"
+    assert data["resources_uris"]["user"]
+    assert data["resources_uris"]["users"]
+
+
+def test_users_page(client):
+    response = client.get("/users", follow_redirects=True)
+    assert response.status_code == 200
+    assert len(response.json) == 4
+
+
+def test_specific_user(client):
+    geralt = {
+        "description": "Traveling monster slayer for hire",
+        "name": "Geralt of Rivia",
+    }
+
+    response = client.get("/users/geralt", follow_redirects=True)
+    assert response.status_code == 200
+    assert response.json == geralt
+
+
+def test_health_page(client):
+    response = client.get("/health", follow_redirects=True)
+    assert response.status_code == 200
+    assert response.json == {"status": "ok"}
