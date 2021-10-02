@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 
 class StringCalculator:
@@ -20,6 +20,9 @@ class StringCalculator:
             raise Exception("negatives not allowed")
         raise Exception(f"negatives not allowed, but found {', '.join(negative_numbers)}")
 
+    def _ignore_big_numbers(self, numbers: List[int]) -> List[int]:
+        return [number for number in numbers if number <= 1000]
+
     def add(self, numbers: str) -> int:
         if not numbers:
             return 0
@@ -30,5 +33,6 @@ class StringCalculator:
             delimiters += f"|{custom_delimiter}"
         numbers = re.split(delimiters, numbers)
         numbers = [int(number) for number in numbers]
+        numbers = self._ignore_big_numbers(numbers)
         self._assert_no_negative_numbers(numbers)
         return sum(numbers)
