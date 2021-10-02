@@ -6,6 +6,9 @@ from flask import Flask
 from werkzeug.exceptions import NotFound
 
 
+from app.settings import Config
+
+
 class User(TypedDict):
     id: str
     name: str
@@ -23,7 +26,7 @@ class UserOutputDto:
 
 
 def load_users() -> List[User]:
-    with open("./users.json", "r") as f:
+    with open(Config.USERS_PATH, "r") as f:
         return json.load(f)
 
 
