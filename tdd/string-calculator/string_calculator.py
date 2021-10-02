@@ -1,5 +1,6 @@
 import re
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple
+
 
 class StringCalculator:
     def __init__(self) -> None:
@@ -11,6 +12,10 @@ class StringCalculator:
         custom_delimiter = numbers.split("\n")[0][2]
         return custom_delimiter
 
+    def _assert_no_negative_number(self, numbers: Iterable[int]) -> None:
+        if any(number < 0 for number in numbers):
+            raise Exception("negatives not allowed")
+
     def add(self, numbers: str) -> int:
         if not numbers:
             return 0
@@ -21,4 +26,5 @@ class StringCalculator:
             delimiters += f"|{custom_delimiter}"
         numbers = re.split(delimiters, numbers)
         numbers = [int(number) for number in numbers]
+        self._assert_no_negative_number(numbers)
         return sum(numbers)
