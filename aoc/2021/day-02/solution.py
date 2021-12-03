@@ -13,14 +13,16 @@ class Direction(Enum):
 class Submarine:
     horizontal_position: int = 0
     depth: int = 0
+    aim: int = 0
 
     def move(self, direction: str, value: int) -> None:
         if direction == Direction.FORWARD.value:
             self.horizontal_position += value
+            self.depth += self.aim * value
         elif direction == Direction.DOWN.value:
-            self.depth += value
+            self.aim += value
         elif direction == Direction.UP.value:
-            self.depth -= value
+            self.aim -= value
 
 
 def read_input() -> Iterator[Tuple[str, int]]:
