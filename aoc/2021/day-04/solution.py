@@ -80,7 +80,7 @@ def get_last_winning_board_and_number(
     inputs: List[int], boards: List[List[int]]
 ) -> Tuple[Board, int]:
     game_boards = [Board(board) for board in boards]
-    won_boards = []
+    won_boards = set()
 
     for number in inputs:
         for board in game_boards:
@@ -90,7 +90,7 @@ def get_last_winning_board_and_number(
             board.draw_number(number)
 
             if board.has_won():
-                won_boards.append(board)
+                won_boards.add(board)
 
                 if len(won_boards) == len(game_boards):
                     return board, number
