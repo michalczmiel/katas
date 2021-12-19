@@ -2,15 +2,15 @@ from typing import List, Tuple
 
 
 class Board:
-    def __init__(self, numbers: List[List[int]]) -> None:
-        self._numbers = numbers
-        self._n = len(numbers)
-        self._marked = [[False] * 5 for _ in range(self._n)]
+    def __init__(self, board: List[List[int]]) -> None:
+        self._board = board
+        self._n = len(self._board)
+        self._marked = [[False] * self._n for _ in range(self._n)]
 
     def draw_number(self, new_number: int) -> None:
         for x in range(self._n):
             for y in range(self._n):
-                if self._numbers[x][y] == new_number:
+                if self._board[x][y] == new_number:
                     self._marked[x][y] = True
 
     def _has_row_completed(self) -> bool:
@@ -28,21 +28,19 @@ class Board:
     def has_won(self) -> bool:
         return self._has_row_completed() or self._has_column_completed()
 
-    def get_unmarked_sum(self) -> int:
+    @property
+    def unmarked_sum(self) -> int:
         unmarked = []
-
         for x in range(self._n):
             for y in range(self._n):
-                if self._marked[x][y] == 0:
-                    unmarked.append(self._numbers[x][y])
-
+                if not self._marked[x][y]:
+                    unmarked.append(self._board[x][y])
         return sum(unmarked)
 
 
 def read_input() -> Tuple[List[int], List[List[int]]]:
     with open("input.txt") as file:
         numbers = [int(number) for number in file.readline().strip().split(",")]
-
         file.readline()
 
         boards = []
@@ -75,16 +73,14 @@ def get_winning_board_final_score(input: Tuple[List[int], List[List[int]]]) -> i
 
     board, number = get_winning_board_and_number(numbers, boards)
 
-    unmarked_sum = board.get_unmarked_sum()
-
-    return number * unmarked_sum
+    return board.unmarked_sum * number
 
 
 def get_last_winning_board_and_number(
     inputs: List[int], boards: List[List[int]]
 ) -> Tuple[Board, int]:
     game_boards = [Board(board) for board in boards]
-    won_boards = []
+    won_boards = set()
 
     for number in inputs:
         for board in game_boards:
@@ -94,7 +90,7 @@ def get_last_winning_board_and_number(
             board.draw_number(number)
 
             if board.has_won():
-                won_boards.append(board)
+                won_boards.add(board)
 
                 if len(won_boards) == len(game_boards):
                     return board, number
@@ -105,7 +101,7 @@ def get_last_winning_board_final_score(input: Tuple[List[int], List[List[int]]])
 
     board, number = get_last_winning_board_and_number(numbers, boards)
 
-    print(board.get_unmarked_sum() * number)
+    return board.unmarked_sum * number
 
 
 def solution() -> None:
