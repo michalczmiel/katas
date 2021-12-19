@@ -80,10 +80,39 @@ def get_winning_board_final_score(input: Tuple[List[int], List[List[int]]]) -> i
     return number * unmarked_sum
 
 
+def get_last_winning_board_and_number(
+    inputs: List[int], boards: List[List[int]]
+) -> Tuple[Board, int]:
+    game_boards = [Board(board) for board in boards]
+    won_boards = []
+
+    for number in inputs:
+        for board in game_boards:
+            if board in won_boards:
+                continue
+
+            board.draw_number(number)
+
+            if board.has_won():
+                won_boards.append(board)
+
+                if len(won_boards) == len(game_boards):
+                    return board, number
+
+
+def get_last_winning_board_final_score(input: Tuple[List[int], List[List[int]]]) -> int:
+    numbers, boards = input
+
+    board, number = get_last_winning_board_and_number(numbers, boards)
+
+    print(board.get_unmarked_sum() * number)
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2021/day/4"""
 
     print(get_winning_board_final_score(read_input()))
+    print(get_last_winning_board_final_score(read_input()))
 
 
 if __name__ == "__main__":
