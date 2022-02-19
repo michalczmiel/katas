@@ -1,4 +1,5 @@
 from typing import List
+from collections import Counter
 
 
 def read_input() -> List[int]:
@@ -6,29 +7,41 @@ def read_input() -> List[int]:
         return [int(value) for value in file.readline().split(",")]
 
 
-def count_lanternfish_after_80_days(initialLanternfishes: List[int]) -> int:
-    days = 80
-
-    lanternfish_pool = initialLanternfishes.copy()
+def count_lanternfish(
+    timers: List[int], days: int, starting_timer: int = 8, producing_timer: int = 6
+):
+    state = Counter(timers)
 
     for day in range(days):
-        new_pool = []
+        new_state = {}
+        new_fishes = state[0]
 
-        for lanterfish_timer in lanternfish_pool:
-            if lanterfish_timer == 0:
-                new_pool.append(6)
-                new_pool.append(8)
-            else:
-                new_pool.append(lanterfish_timer - 1)
-        lanternfish_pool = new_pool
+        for timer in range(starting_timer):
+            new_state[timer] = state[timer + 1]
 
-    return len(lanternfish_pool)
+            if timer == producing_timer:
+                new_state[timer] += new_fishes
+
+        new_state[starting_timer] = new_fishes
+        state = new_state
+
+    count = sum(state.values())
+    return count
+
+
+def count_lanternfish_after_80_days(timers: List[int]) -> int:
+    return count_lanternfish(timers, days=80)
+
+
+def count_lanternfish_after_256_days(timers: List[int]) -> int:
+    return count_lanternfish(timers, days=256)
 
 
 def solution() -> None:
     """Solution to https://adventofcode.com/2021/day/6"""
 
     print(count_lanternfish_after_80_days(read_input()))
+    print(count_lanternfish_after_256_days(read_input()))
 
 
 if __name__ == "__main__":
