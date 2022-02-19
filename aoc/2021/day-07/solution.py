@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 
 def read_input() -> List[int]:
@@ -6,28 +6,31 @@ def read_input() -> List[int]:
         return [int(value) for value in file.readline().split(",")]
 
 
-def get_min_required_fuel(positions: List[int]) -> int:
+def calculate_lowest_fuel_costs(fuel_calculator: Callable, positions: List[int]) -> int:
     costs = {
-        sum(abs(position - possible_best_position) for position in positions)
+        sum(fuel_calculator(position, possible_best_position) for position in positions)
         for possible_best_position in range(max(positions))
     }
-
     return min(costs)
 
 
-def compute_fuel(a, b) -> int:
+def calculate_fuel(a: int, b: int) -> int:
+    fuel = abs(a - b)
+    return fuel
+
+
+def get_min_required_fuel(positions: List[int]) -> int:
+    return calculate_lowest_fuel_costs(calculate_fuel, positions)
+
+
+def calculate_fuel_adjusted(a: int, b: int) -> int:
     steps = abs(a - b)
     fuel = round(steps * (steps + 1) / 2)
     return fuel
 
 
 def get_min_required_fuel_adjusted(positions: List[int]) -> int:
-    costs = {
-        sum(compute_fuel(position, possible_best_position) for position in positions)
-        for possible_best_position in range(max(positions))
-    }
-
-    return min(costs)
+    return calculate_lowest_fuel_costs(calculate_fuel_adjusted, positions)
 
 
 def solution() -> None:
