@@ -1,38 +1,87 @@
-from typing import List, Tuple
+from typing import List, Tuple, NewType
 from collections import Counter
+from dataclasses import dataclass
 
 
-def read_input() -> List[Tuple[int, int, int, int]]:
+Point = NewType("Point", Tuple[int, int])
+
+
+@dataclass(frozen=True)
+class Line:
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+
+    @property
+    def is_horizontal(self) -> bool:
+        return self.x1 == self.x2
+
+    @property
+    def is_vertical(self) -> bool:
+        return self.y1 == self.y2
+
+    @property
+    def is_45_deg_diagonal(self) -> bool:
+        return abs(self.x1 - self.x2) == abs(self.y1 - self.y2)
+
+
+def get_horizontal_points(line: Line) -> List[Point]:
+    y_min = min(line.y1, line.y2)
+    y_max = max(line.y1, line.y2)
+
+    return [(line.x1, y) for y in range(y_min, y_max + 1)]
+
+
+def get_vertical_points(line: Line) -> List[Point]:
+    x_min = min(line.x1, line.x2)
+    x_max = max(line.x1, line.x2)
+
+    return [(x, line.y1) for x in range(x_min, x_max + 1)]
+
+
+def get_45_diagonal_points(line: Line) -> List[Point]:
+    x_delta = 1 if line.x1 < line.x2 else -1
+    y_delta = 1 if line.y1 < line.y2 else -1
+
+    current_x1 = line.x1
+    current_y1 = line.y1
+
+    points = [(current_x1, current_y1)]
+    while current_x1 != line.x2 and current_y1 != line.y2:
+        current_x1 += x_delta
+        current_y1 += y_delta
+        points.append((current_x1, current_y1))
+    return points
+
+
+def read_input() -> List[Line]:
     lines = []
 
     with open("input.txt") as file:
         for line in file.readlines():
             start, end = line.strip().split(" -> ")
 
-            x1, y1 = [int(x) for x in start.split(",")]
-            x2, y2 = [int(x) for x in end.split(",")]
+            x1, y1 = [int(value) for value in start.split(",")]
+            x2, y2 = [int(value) for value in end.split(",")]
 
-            lines.append((x1, y1, x2, y2))
+            lines.append(Line(x1, y1, x2, y2))
     return lines
 
 
-def count_overlap_points_horizontal_and_vertical(
-    lines: List[Tuple[int, int, int, int]]
-):
+def count_overlap_points_horizontal_and_vertical(lines: List[Line]):
     overlaps_counter = Counter()
 
-    for x1, y1, x2, y2 in lines:
-        if x1 == x2:
-            y_min = min(y1, y2)
-            y_max = max(y1, y2)
+    for line in lines:
+        points = []
 
-            overlaps_counter.update((x1, y) for y in range(y_min, y_max + 1))
+        if line.is_horizontal:
+            points = get_horizontal_points(line)
+        elif line.is_vertical:
+            points = get_vertical_points(line)
 
-        elif y1 == y2:
-            x_min = min(x1, x2)
-            x_max = max(x1, x2)
-
-            overlaps_counter.update((x, y1) for x in range(x_min, x_max + 1))
+        if points:
+            overlaps_counter.update(points)
 
     count = len(
         [
@@ -44,39 +93,20 @@ def count_overlap_points_horizontal_and_vertical(
     return count
 
 
-def count_overlap_points_horizontal_vertical_diagonal(
-    lines: List[Tuple[int, int, int, int]]
-):
+def count_overlap_points_horizontal_vertical_diagonal(lines: List[Line]):
     overlaps_counter = Counter()
 
-    for x1, y1, x2, y2 in lines:
-        if x1 == x2:
-            y_min = min(y1, y2)
-            y_max = max(y1, y2)
+    for line in lines:
+        points = []
 
-            overlaps_counter.update((x1, y) for y in range(y_min, y_max + 1))
+        if line.is_horizontal:
+            points = get_horizontal_points(line)
+        elif line.is_vertical:
+            points = get_vertical_points(line)
+        elif line.is_45_deg_diagonal:
+            points = get_45_diagonal_points(line)
 
-        elif y1 == y2:
-            x_min = min(x1, x2)
-            x_max = max(x1, x2)
-
-            overlaps_counter.update((x, y1) for x in range(x_min, x_max + 1))
-
-        if abs(x1 - x2) == abs(y1 - y2):
-            x_delta = 1 if x1 < x2 else -1
-            y_delta = 1 if y1 < y2 else -1
-
-            points = []
-
-            current_x1 = x1
-            current_y1 = y1
-
-            points.append((current_x1, current_y1))
-            while current_x1 != x2 and current_y1 != y2:
-                current_x1 += x_delta
-                current_y1 += y_delta
-                points.append((current_x1, current_y1))
-
+        if points:
             overlaps_counter.update(points)
 
     count = len(
