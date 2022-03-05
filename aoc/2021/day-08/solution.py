@@ -63,41 +63,22 @@ def count_output_values_sum(list_of_inputs: List[Input]) -> int:
             found_digit = digit if isinstance(digit, int) else None
             signal_elements = set(digit_signal)
 
+            one_intersections_count = len(signal_elements.intersection(one_signals))
+            four_intersections_count = len(signal_elements.intersection(four_signals))
+
+            digit_intersection_mapping = {
+                2: one_intersections_count == 1 and four_intersections_count == 2,
+                3: one_intersections_count == 2,
+                5: one_intersections_count == 1 and four_intersections_count == 3,
+                0: one_intersections_count == 2 and four_intersections_count == 3,
+                6: one_intersections_count == 1,
+                9: four_intersections_count == 4,
+            }
+
             if not found_digit:
                 for possible_digit in digit:
-                    if (
-                        possible_digit == 6
-                        and len(signal_elements.intersection(one_signals)) == 1
-                    ):
-                        found_digit = 6
-                    elif (
-                        possible_digit == 9
-                        and len(signal_elements.intersection(four_signals)) == 4
-                    ):
-                        found_digit = 9
-                    elif (
-                        possible_digit == 2
-                        and len(signal_elements.intersection(one_signals)) == 1
-                        and len(signal_elements.intersection(four_signals)) == 2
-                    ):
-                        found_digit = 2
-                    elif (
-                        possible_digit == 3
-                        and len(signal_elements.intersection(one_signals)) == 2
-                    ):
-                        found_digit = 3
-                    elif (
-                        possible_digit == 5
-                        and len(signal_elements.intersection(four_signals)) == 3
-                        and len(signal_elements.intersection(one_signals)) == 1
-                    ):
-                        found_digit = 5
-                    elif (
-                        possible_digit == 0
-                        and len(signal_elements.intersection(four_signals)) == 3
-                        and len(signal_elements.intersection(one_signals)) == 2
-                    ):
-                        found_digit = 0
+                    if digit_intersection_mapping[possible_digit]:
+                        found_digit = possible_digit
 
             key = "".join(sorted(signal_elements))
             signal_mapping[key] = found_digit
