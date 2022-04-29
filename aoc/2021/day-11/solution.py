@@ -71,10 +71,25 @@ def count_flashes_after_100_steps(energy_levels: EnergyLevels) -> int:
     return total_flashed_count
 
 
+def get_first_flash_step(energy_levels: EnergyLevels) -> int:
+    found_step = None
+    current_step = 1
+
+    while not found_step:
+        energy_levels, flashed_count = update_energy_levels(energy_levels)
+
+        if flashed_count == 100:
+            found_step = current_step
+        current_step += 1
+
+    return found_step
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2021/day/11"""
 
     print(count_flashes_after_100_steps(read_input()))
+    print(get_first_flash_step(read_input()))
 
 
 if __name__ == "__main__":
