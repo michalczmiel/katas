@@ -5,16 +5,18 @@ import (
 	"os"
 )
 
-type FileLogger struct {
-	fileName string
-}
+type LocalFileStorage struct{}
 
-func (l FileLogger) Log(message string) {
-	file, err := os.OpenFile(l.fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+func (s LocalFileStorage) AppendStringToFile(fileName string, message string) (err error) {
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
-	// file not found
+	// file not found, creating a new one
+	if os.IsNotExist(err) {
+		file, err = os.Create(fileName)
+	}
+
 	if err != nil {
-		file, err = os.Create(l.fileName)
+		return err
 	}
 
 	defer file.Close()
@@ -24,10 +26,27 @@ func (l FileLogger) Log(message string) {
 
 	if err != nil {
 		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+type FileLogger struct {
+	fileName string
+	storage  *LocalFileStorage
+}
+
+func (l FileLogger) Log(message string) {
+	err := l.storage.AppendStringToFile(l.fileName, message)
+
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 
 func main() {
-	logger := FileLogger{"log.txt"}
+	storage := LocalFileStorage{}
+	logger := FileLogger{"log.txt", &storage}
 	logger.Log("Hello world!")
 }
