@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+type FileStorage interface {
+	AppendStringToFile(fileName string, message string) (err error)
+}
+
 type LocalFileStorage struct{}
 
 func (s LocalFileStorage) AppendStringToFile(fileName string, message string) (err error) {
@@ -34,10 +38,10 @@ func (s LocalFileStorage) AppendStringToFile(fileName string, message string) (e
 
 type FileLogger struct {
 	fileName string
-	storage  *LocalFileStorage
+	storage  FileStorage
 }
 
-func (l FileLogger) Log(message string) {
+func (l *FileLogger) Log(message string) {
 	err := l.storage.AppendStringToFile(l.fileName, message)
 
 	if err != nil {
@@ -47,6 +51,6 @@ func (l FileLogger) Log(message string) {
 
 func main() {
 	storage := LocalFileStorage{}
-	logger := FileLogger{"log.txt", &storage}
+	logger := FileLogger{"log.txt", storage}
 	logger.Log("Hello world!")
 }
