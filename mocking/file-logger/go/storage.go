@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 )
 
 type FileStorage interface {
 	AppendStringToFile(fileName, message string) error
+	FileExists(fileName string) bool
 }
 
 type localFileStorage struct{}
@@ -34,4 +36,14 @@ func (s *localFileStorage) AppendStringToFile(fileName, message string) error {
 	}
 
 	return nil
+}
+
+func (s *localFileStorage) FileExists(fileName string) bool {
+	_, err := os.Stat(fileName)
+
+	if errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+
+	return true
 }

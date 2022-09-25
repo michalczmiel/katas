@@ -27,6 +27,18 @@ func (s *InMemoryFileStorage) AppendStringToFile(fileName, message string) error
 	return nil
 }
 
+func (s *InMemoryFileStorage) FileExists(fileName string) bool {
+	if s.Log == nil {
+		return false
+	}
+
+	if s.Log[fileName] == nil {
+		return false
+	}
+
+	return true
+}
+
 type fakeClock struct {
 	time time.Time
 }
