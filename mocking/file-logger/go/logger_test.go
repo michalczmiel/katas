@@ -84,25 +84,14 @@ func TestLogWritesToFileWithCurrentDateOnWeekday(t *testing.T) {
 	logger.Log("First log")
 	logger.Log("Second log")
 
-	expectedFileName := "log20220922.txt"
-
-	logs, exist := storage.Logs[expectedFileName]
-
-	if !exist {
-		t.Log("File " + expectedFileName + " not created")
-		t.Fail()
+	expected := map[string][]string{
+		"log20220922.txt": {"First log", "Second log"},
 	}
 
-	// then
-	if len(logs) != 2 {
-		t.Log("Two logs should have been logged but got", len(storage.Logs))
-		t.Fail()
-	}
-
-	expected := []string{"First log", "Second log"}
-
-	if !reflect.DeepEqual(logs, expected) {
+	if !reflect.DeepEqual(storage.Logs, expected) {
 		t.Log("Logs don't match")
+		t.Logf("Expected: %v", expected)
+		t.Logf("Received: %v", storage.Logs)
 		t.Fail()
 	}
 }
@@ -117,25 +106,14 @@ func TestLogWritesToFileWithCurrentDateOnSaturday(t *testing.T) {
 	logger.Log("First log")
 	logger.Log("Second log")
 
-	expectedFileName := "weekend.txt"
-
-	logs, exist := storage.Logs[expectedFileName]
-
-	if !exist {
-		t.Log("File " + expectedFileName + " not created")
-		t.Fail()
+	expected := map[string][]string{
+		"weekend.txt": {"First log", "Second log"},
 	}
 
-	// then
-	if len(logs) != 2 {
-		t.Log("Two logs should have been logged but got", len(storage.Logs))
-		t.Fail()
-	}
-
-	expected := []string{"First log", "Second log"}
-
-	if !reflect.DeepEqual(logs, expected) {
+	if !reflect.DeepEqual(storage.Logs, expected) {
 		t.Log("Logs don't match")
+		t.Logf("Expected: %v", expected)
+		t.Logf("Received: %v", storage.Logs)
 		t.Fail()
 	}
 }
@@ -150,25 +128,14 @@ func TestLogWritesToFileWithCurrentDateOnSunday(t *testing.T) {
 	logger.Log("First log")
 	logger.Log("Second log")
 
-	expectedFileName := "weekend.txt"
-
-	logs, exist := storage.Logs[expectedFileName]
-
-	if !exist {
-		t.Log("File " + expectedFileName + " not created")
-		t.Fail()
+	expected := map[string][]string{
+		"weekend.txt": {"First log", "Second log"},
 	}
 
-	// then
-	if len(logs) != 2 {
-		t.Log("Two logs should have been logged but got", len(storage.Logs))
-		t.Fail()
-	}
-
-	expected := []string{"First log", "Second log"}
-
-	if !reflect.DeepEqual(logs, expected) {
+	if !reflect.DeepEqual(storage.Logs, expected) {
 		t.Log("Logs don't match")
+		t.Logf("Expected: %v", expected)
+		t.Logf("Received: %v", storage.Logs)
 		t.Fail()
 	}
 }
@@ -203,5 +170,4 @@ func TestLogRenamesThePreviousWeekendFile(t *testing.T) {
 		t.Logf("Received: %v", storage.Logs)
 		t.Fail()
 	}
-
 }
