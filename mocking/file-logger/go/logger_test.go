@@ -74,7 +74,7 @@ func (fakeClock fakeClock) Now() time.Time {
 	return fakeClock.time
 }
 
-func TestLogWritesToFileWithCurrentDateOnWeekday(t *testing.T) {
+func TestLogWritesToNewFileWithCurrentDateOnWeekday(t *testing.T) {
 	// given
 	storage := &InMemoryFileStorage{}
 	clock := fakeClock{time.Date(2022, 9, 22, 10, 0, 0, 0, time.UTC)}
@@ -96,7 +96,31 @@ func TestLogWritesToFileWithCurrentDateOnWeekday(t *testing.T) {
 	}
 }
 
-func TestLogWritesToFileWithCurrentDateOnSaturday(t *testing.T) {
+func TestLogWritesToExistingFileWithCurrentDateOnWeekday(t *testing.T) {
+	// given
+	mockedLogs := map[string][]string{
+		"log20220922.txt": {"First log"},
+	}
+	storage := &InMemoryFileStorage{Logs: mockedLogs}
+	clock := fakeClock{time.Date(2022, 9, 22, 10, 0, 0, 0, time.UTC)}
+	logger := FileLogger{storage, clock}
+
+	// when
+	logger.Log("Second log")
+
+	expected := map[string][]string{
+		"log20220922.txt": {"First log", "Second log"},
+	}
+
+	if !reflect.DeepEqual(storage.Logs, expected) {
+		t.Log("Logs don't match")
+		t.Logf("Expected: %v", expected)
+		t.Logf("Received: %v", storage.Logs)
+		t.Fail()
+	}
+}
+
+func TestLogWritesToNewFileWithCurrentDateOnSaturday(t *testing.T) {
 	// given
 	storage := &InMemoryFileStorage{}
 	clock := fakeClock{time.Date(2022, 9, 24, 10, 0, 0, 0, time.UTC)}
@@ -118,14 +142,38 @@ func TestLogWritesToFileWithCurrentDateOnSaturday(t *testing.T) {
 	}
 }
 
-func TestLogWritesToFileWithCurrentDateOnSunday(t *testing.T) {
+func TestLogWritesToExistingFileWithCurrentDateOnSaturday(t *testing.T) {
 	// given
 	storage := &InMemoryFileStorage{}
-	clock := fakeClock{time.Date(2022, 9, 25, 10, 0, 0, 0, time.UTC)}
+	clock := fakeClock{time.Date(2022, 9, 24, 10, 0, 0, 0, time.UTC)}
 	logger := FileLogger{storage, clock}
 
 	// when
 	logger.Log("First log")
+	logger.Log("Second log")
+
+	expected := map[string][]string{
+		"weekend.txt": {"First log", "Second log"},
+	}
+
+	if !reflect.DeepEqual(storage.Logs, expected) {
+		t.Log("Logs don't match")
+		t.Logf("Expected: %v", expected)
+		t.Logf("Received: %v", storage.Logs)
+		t.Fail()
+	}
+}
+
+func TestLogWritesToNewFileWithCurrentDateOnSunday(t *testing.T) {
+	// given
+	mockedLogs := map[string][]string{
+		"weekend.txt": {"First log"},
+	}
+	storage := &InMemoryFileStorage{Logs: mockedLogs}
+	clock := fakeClock{time.Date(2022, 9, 25, 10, 0, 0, 0, time.UTC)}
+	logger := FileLogger{storage, clock}
+
+	// when
 	logger.Log("Second log")
 
 	expected := map[string][]string{
