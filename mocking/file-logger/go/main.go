@@ -55,8 +55,6 @@ type FileLogger struct {
 func (l *FileLogger) getFileName() string {
 	currentTime := l.clock.Now()
 
-	fmt.Println(currentTime)
-
 	fileName := "log" + currentTime.Format("20060102") + ".txt"
 
 	return fileName
