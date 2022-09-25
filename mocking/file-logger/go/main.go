@@ -11,7 +11,7 @@ type FileStorage interface {
 
 type LocalFileStorage struct{}
 
-func (s LocalFileStorage) AppendStringToFile(fileName string, message string) (err error) {
+func (s *LocalFileStorage) AppendStringToFile(fileName string, message string) (err error) {
 	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	// file not found, creating a new one
@@ -50,7 +50,7 @@ func (l *FileLogger) Log(message string) {
 }
 
 func main() {
-	storage := LocalFileStorage{}
+	storage := &LocalFileStorage{}
 	logger := FileLogger{"log.txt", storage}
 	logger.Log("Hello world!")
 }
