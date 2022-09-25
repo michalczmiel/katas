@@ -54,7 +54,17 @@ func (l *FileLogger) getFileName() string {
 		return DefaultWeekendFileName
 	}
 
-	newFileName := l.formatPreviousWeekendFile(modTime)
+	var previousSaturday *time.Time
+
+	if modTime.Weekday() == time.Saturday {
+		previousSaturday = modTime
+	} else {
+		saturday := modTime.AddDate(0, 0, -1)
+
+		previousSaturday = &saturday
+	}
+
+	newFileName := l.formatPreviousWeekendFile(previousSaturday)
 
 	// rename the old file created in past weekend
 	err = l.storage.RenameFile(DefaultWeekendFileName, newFileName)

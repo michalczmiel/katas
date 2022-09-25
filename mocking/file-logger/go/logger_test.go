@@ -195,7 +195,7 @@ func TestLogRenamesThePreviousWeekendFile(t *testing.T) {
 	}
 
 	mockedModificationTime := map[string]time.Time{
-		"weekend.txt": time.Date(2022, 9, 17, 10, 0, 0, 0, time.UTC),
+		"weekend.txt": time.Date(2022, 9, 18, 10, 0, 0, 0, time.UTC),
 	}
 
 	storage := &InMemoryFileStorage{Logs: mockedLogs, ModificationTime: mockedModificationTime}
