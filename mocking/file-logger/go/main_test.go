@@ -33,7 +33,7 @@ func (fakeClock) Now() time.Time {
 	return time.Date(2022, 9, 24, 10, 0, 0, 0, time.UTC)
 }
 
-func TestLog(t *testing.T) {
+func TestLogWritesToFileWithCurrentDate(t *testing.T) {
 	// given
 	storage := &InMemoryFileStorage{}
 	clock := fakeClock{}
@@ -43,15 +43,24 @@ func TestLog(t *testing.T) {
 	logger.Log("First log")
 	logger.Log("Second log")
 
+	expectedFileName := "log20220924.txt"
+
+	if storage.Log[expectedFileName] == nil {
+		t.Log("File " + expectedFileName + " not created")
+		t.Fail()
+	}
+
+	logs := storage.Log[expectedFileName]
+
 	// then
-	if len(storage.Logs) != 2 {
+	if len(logs) != 2 {
 		t.Log("Two logs should have been logged but got", len(storage.Logs))
 		t.Fail()
 	}
 
 	expected := []string{"First log", "Second log"}
 
-	if !reflect.DeepEqual(storage.Logs, expected) {
+	if !reflect.DeepEqual(logs, expected) {
 		t.Log("Logs don't match")
 		t.Fail()
 	}
