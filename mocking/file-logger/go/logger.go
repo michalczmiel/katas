@@ -46,7 +46,7 @@ func (l *FileLogger) getFileName() string {
 		return DefaultWeekendFileName
 	}
 
-	newFileName := "weekend" + modTime.Format("20060102") + ".txt"
+	newFileName := "weekend-" + modTime.Format("20060102") + ".txt"
 
 	// rename the old file created in past weekend
 	err = l.storage.RenameFile(DefaultWeekendFileName, newFileName)

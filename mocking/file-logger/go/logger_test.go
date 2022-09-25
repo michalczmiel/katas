@@ -193,8 +193,8 @@ func TestLogRenamesThePreviousWeekendFile(t *testing.T) {
 	logger.Log("Second log")
 
 	expected := map[string][]string{
-		"weekend.txt":         {"First log", "Second log"},
-		"weekend20220917.txt": {},
+		"weekend.txt":          {"First log", "Second log"},
+		"weekend-20220917.txt": {},
 	}
 
 	if !reflect.DeepEqual(storage.Logs, expected) {
