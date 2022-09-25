@@ -37,12 +37,25 @@ func (s *localFileStorage) AppendStringToFile(fileName string, message string) (
 	return nil
 }
 
+type Clock interface {
+	Now() time.Time
+}
+
+type realClock struct{}
+
+func (realClock) Now() time.Time {
+	return time.Now()
+}
+
 type FileLogger struct {
 	storage FileStorage
+	clock   Clock
 }
 
 func (l *FileLogger) getFileName() string {
-	currentTime := time.Now()
+	currentTime := l.clock.Now()
+
+	fmt.Println(currentTime)
 
 	fileName := "log" + currentTime.Format("20060102") + ".txt"
 
@@ -61,6 +74,7 @@ func (l *FileLogger) Log(message string) {
 
 func main() {
 	storage := &localFileStorage{}
-	logger := FileLogger{storage}
+	clock := realClock{}
+	logger := FileLogger{storage, clock}
 	logger.Log("Hello world!")
 }
