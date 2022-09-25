@@ -18,7 +18,7 @@ func (s *InMemoryFileStorage) AppendStringToFile(fileName string, message string
 func TestLog(t *testing.T) {
 	// given
 	storage := &InMemoryFileStorage{}
-	logger := FileLogger{"log.txt", storage}
+	logger := FileLogger{storage}
 
 	// when
 	logger.Log("First log")
