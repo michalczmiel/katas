@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 )
 
 type FileStorage interface {
 	AppendStringToFile(fileName, message string) error
 	FileExists(fileName string) bool
 	RenameFile(oldPath, newPath string) error
+	FileModificationTime(fileName string) (*time.Time, error)
 }
 
 type localFileStorage struct{}
@@ -53,4 +55,16 @@ func (s *localFileStorage) RenameFile(oldPath, newPath string) error {
 	err := os.Rename(oldPath, newPath)
 
 	return err
+}
+
+func (s *localFileStorage) FileModificationTime(fileName string) (*time.Time, error) {
+	info, err := os.Stat(fileName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	t := info.ModTime()
+
+	return &t, nil
 }
