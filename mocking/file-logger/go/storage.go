@@ -8,20 +8,20 @@ import (
 )
 
 type FileStorage interface {
-	AppendStringToFile(fileName, message string) error
-	FileExists(fileName string) bool
+	AppendStringToFile(path, message string) error
+	FileExists(path string) bool
 	RenameFile(oldPath, newPath string) error
-	FileModificationTime(fileName string) (*time.Time, error)
+	FileModificationTime(path string) (*time.Time, error)
 }
 
 type localFileStorage struct{}
 
-func (s *localFileStorage) AppendStringToFile(fileName, message string) error {
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+func (localFileStorage) AppendStringToFile(path, message string) error {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	// file not found, creating a new one
 	if os.IsNotExist(err) {
-		file, err = os.Create(fileName)
+		file, err = os.Create(path)
 	}
 
 	if err != nil {
@@ -41,8 +41,8 @@ func (s *localFileStorage) AppendStringToFile(fileName, message string) error {
 	return nil
 }
 
-func (s *localFileStorage) FileExists(fileName string) bool {
-	_, err := os.Stat(fileName)
+func (localFileStorage) FileExists(path string) bool {
+	_, err := os.Stat(path)
 
 	if errors.Is(err, os.ErrNotExist) {
 		return false
@@ -51,14 +51,14 @@ func (s *localFileStorage) FileExists(fileName string) bool {
 	return true
 }
 
-func (s *localFileStorage) RenameFile(oldPath, newPath string) error {
+func (localFileStorage) RenameFile(oldPath, newPath string) error {
 	err := os.Rename(oldPath, newPath)
 
 	return err
 }
 
-func (s *localFileStorage) FileModificationTime(fileName string) (*time.Time, error) {
-	info, err := os.Stat(fileName)
+func (localFileStorage) FileModificationTime(path string) (*time.Time, error) {
+	info, err := os.Stat(path)
 
 	if err != nil {
 		return nil, err

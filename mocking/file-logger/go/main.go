@@ -1,5 +1,6 @@
 package main
 
+// example usage of FileLogger
 func main() {
 	storage := &localFileStorage{}
 	clock := realClock{}

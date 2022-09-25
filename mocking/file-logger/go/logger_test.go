@@ -11,28 +11,28 @@ type InMemoryFileStorage struct {
 	ModificationTime map[string]time.Time
 }
 
-func (s *InMemoryFileStorage) AppendStringToFile(fileName, message string) error {
+func (s *InMemoryFileStorage) AppendStringToFile(path, message string) error {
 	if s.Logs == nil {
 		s.Logs = make(map[string][]string)
 	}
 
-	logs, exist := s.Logs[fileName]
+	logs, exist := s.Logs[path]
 
 	if !exist {
-		s.Logs[fileName] = []string{}
+		s.Logs[path] = []string{}
 	}
 
-	s.Logs[fileName] = append(logs, message)
+	s.Logs[path] = append(logs, message)
 
 	return nil
 }
 
-func (s *InMemoryFileStorage) FileExists(fileName string) bool {
+func (s *InMemoryFileStorage) FileExists(path string) bool {
 	if s.Logs == nil {
 		return false
 	}
 
-	_, exist := s.Logs[fileName]
+	_, exist := s.Logs[path]
 
 	return exist
 }
@@ -56,8 +56,8 @@ func (s *InMemoryFileStorage) RenameFile(oldPath, newPath string) error {
 	return nil
 }
 
-func (s *InMemoryFileStorage) FileModificationTime(fileName string) (*time.Time, error) {
-	modTime, exist := s.ModificationTime[fileName]
+func (s *InMemoryFileStorage) FileModificationTime(path string) (*time.Time, error) {
+	modTime, exist := s.ModificationTime[path]
 
 	if !exist {
 		modTime = time.Date(2022, 9, 24, 8, 0, 0, 0, time.UTC)
@@ -70,8 +70,8 @@ type fakeClock struct {
 	time time.Time
 }
 
-func (fakeClock fakeClock) Now() time.Time {
-	return fakeClock.time
+func (c fakeClock) Now() time.Time {
+	return c.time
 }
 
 func TestLogWritesToNewFileWithCurrentDateOnWeekday(t *testing.T) {

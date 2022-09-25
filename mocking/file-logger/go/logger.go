@@ -11,14 +11,22 @@ const (
 
 type FileLogger struct {
 	storage FileStorage
-	clock   Clock
+	clock   clock
+}
+
+func (FileLogger) formatWeekdayFile(currentTime *time.Time) string {
+	return "log" + currentTime.Format("20060102") + ".txt"
+}
+
+func (FileLogger) formatPreviousWeekendFile(modTime *time.Time) string {
+	return "weekend-" + modTime.Format("20060102") + ".txt"
 }
 
 func (l *FileLogger) getFileName() string {
 	currentTime := l.clock.Now()
 
 	if !IsWeekend(currentTime) {
-		return "log" + currentTime.Format("20060102") + ".txt"
+		return l.formatWeekdayFile(&currentTime)
 	}
 
 	if !l.storage.FileExists(DefaultWeekendFileName) {
@@ -46,7 +54,7 @@ func (l *FileLogger) getFileName() string {
 		return DefaultWeekendFileName
 	}
 
-	newFileName := "weekend-" + modTime.Format("20060102") + ".txt"
+	newFileName := l.formatPreviousWeekendFile(modTime)
 
 	// rename the old file created in past weekend
 	err = l.storage.RenameFile(DefaultWeekendFileName, newFileName)
