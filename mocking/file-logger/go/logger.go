@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type FileLogger struct {
 	storage FileStorage
@@ -10,7 +13,15 @@ type FileLogger struct {
 func (l *FileLogger) getFileName() string {
 	currentTime := l.clock.Now()
 
-	fileName := "log" + currentTime.Format("20060102") + ".txt"
+	day := currentTime.Weekday()
+
+	var fileName string
+
+	if day == time.Saturday || day == time.Sunday {
+		fileName = "weekend.txt"
+	} else {
+		fileName = "log" + currentTime.Format("20060102") + ".txt"
+	}
 
 	return fileName
 }
