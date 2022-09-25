@@ -54,6 +54,13 @@ func (s *InMemoryFileStorage) RenameFile(oldPath, newPath string) error {
 	return nil
 }
 
+func (s *InMemoryFileStorage) FileModificationTime(fileName string) (*time.Time, error) {
+	// TODO: make it dynamic
+	t := time.Date(2022, 9, 22, 10, 0, 0, 0, time.UTC)
+
+	return &t, nil
+}
+
 type fakeClock struct {
 	time time.Time
 }
