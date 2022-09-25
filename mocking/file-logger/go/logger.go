@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -22,6 +21,25 @@ func (FileLogger) formatPreviousWeekendFile(modTime *time.Time) string {
 	return "weekend-" + modTime.Format("20060102") + ".txt"
 }
 
+func (FileLogger) wasFileModifiedThisWeekend(currentTime, modTime *time.Time) bool {
+	var currentWeekBeginning time.Time
+
+	if currentTime.Weekday() == time.Saturday {
+		year, month, day := currentTime.Date()
+		currentWeekBeginning = time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+	} else {
+		year, month, day := currentTime.Date()
+		currentWeekBeginning = time.Date(year, month, day-1, 0, 0, 0, 0, time.UTC)
+	}
+
+	// check if file was created during this weekend
+	if modTime.After(currentWeekBeginning) {
+		return true
+	}
+
+	return false
+}
+
 func (l *FileLogger) getFileName() string {
 	currentTime := l.clock.Now()
 
@@ -39,18 +57,7 @@ func (l *FileLogger) getFileName() string {
 		panic("Couldn't get the modification time from " + DefaultWeekendFileName)
 	}
 
-	var currentWeekBeginning time.Time
-
-	if currentTime.Weekday() == time.Saturday {
-		year, month, day := currentTime.Date()
-		currentWeekBeginning = time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
-	} else {
-		year, month, day := currentTime.Date()
-		currentWeekBeginning = time.Date(year, month, day-1, 0, 0, 0, 0, time.UTC)
-	}
-
-	// check if file was created during this weekend
-	if modTime.After(currentWeekBeginning) {
+	if l.wasFileModifiedThisWeekend(&currentTime, modTime) {
 		return DefaultWeekendFileName
 	}
 
@@ -81,6 +88,6 @@ func (l *FileLogger) Log(message string) {
 	err := l.storage.AppendStringToFile(fileName, message)
 
 	if err != nil {
-		fmt.Println(err)
+		panic("Couldn't write to a file " + fileName)
 	}
 }

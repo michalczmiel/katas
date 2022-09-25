@@ -34,7 +34,6 @@ func (localFileStorage) AppendStringToFile(path, message string) error {
 	_, err = fmt.Fprintln(file, message)
 
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
