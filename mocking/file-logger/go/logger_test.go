@@ -7,7 +7,8 @@ import (
 )
 
 type InMemoryFileStorage struct {
-	Logs map[string][]string
+	Logs             map[string][]string
+	ModificationTime map[string]time.Time
 }
 
 func (s *InMemoryFileStorage) AppendStringToFile(fileName, message string) error {
@@ -48,16 +49,21 @@ func (s *InMemoryFileStorage) RenameFile(oldPath, newPath string) error {
 	}
 
 	s.Logs[newPath] = logs
+
 	delete(s.Logs, oldPath)
+	delete(s.ModificationTime, oldPath)
 
 	return nil
 }
 
 func (s *InMemoryFileStorage) FileModificationTime(fileName string) (*time.Time, error) {
-	// TODO: make it dynamic
-	t := time.Date(2022, 9, 24, 8, 0, 0, 0, time.UTC)
+	modTime, exist := s.ModificationTime[fileName]
 
-	return &t, nil
+	if !exist {
+		modTime = time.Date(2022, 9, 24, 8, 0, 0, 0, time.UTC)
+	}
+
+	return &modTime, nil
 }
 
 type fakeClock struct {
@@ -165,4 +171,37 @@ func TestLogWritesToFileWithCurrentDateOnSunday(t *testing.T) {
 		t.Log("Logs don't match")
 		t.Fail()
 	}
+}
+
+func TestLogRenamesThePreviousWeekendFile(t *testing.T) {
+	// given
+	mockedLogs := map[string][]string{
+		"weekend.txt": {},
+	}
+
+	mockedModificationTime := map[string]time.Time{
+		"weekend.txt": time.Date(2022, 9, 17, 10, 0, 0, 0, time.UTC),
+	}
+
+	storage := &InMemoryFileStorage{Logs: mockedLogs, ModificationTime: mockedModificationTime}
+
+	clock := fakeClock{time.Date(2022, 9, 25, 10, 0, 0, 0, time.UTC)}
+	logger := FileLogger{storage, clock}
+
+	// when
+	logger.Log("First log")
+	logger.Log("Second log")
+
+	expected := map[string][]string{
+		"weekend.txt":         {"First log", "Second log"},
+		"weekend20220917.txt": {},
+	}
+
+	if !reflect.DeepEqual(storage.Logs, expected) {
+		t.Log("Logs don't match")
+		t.Logf("Expected: %v", expected)
+		t.Logf("Received: %v", storage.Logs)
+		t.Fail()
+	}
+
 }
