@@ -9,6 +9,7 @@ import (
 type FileStorage interface {
 	AppendStringToFile(fileName, message string) error
 	FileExists(fileName string) bool
+	RenameFile(oldPath, newPath string) error
 }
 
 type localFileStorage struct{}
@@ -46,4 +47,10 @@ func (s *localFileStorage) FileExists(fileName string) bool {
 	}
 
 	return true
+}
+
+func (s *localFileStorage) RenameFile(oldPath, newPath string) error {
+	err := os.Rename(oldPath, newPath)
+
+	return err
 }

@@ -39,6 +39,21 @@ func (s *InMemoryFileStorage) FileExists(fileName string) bool {
 	return true
 }
 
+func (s *InMemoryFileStorage) RenameFile(oldPath, newPath string) error {
+	if s.Log == nil {
+		return nil
+	}
+
+	if s.Log[oldPath] == nil {
+		return nil
+	}
+
+	s.Log[newPath] = s.Log[oldPath]
+	delete(s.Log, oldPath)
+
+	return nil
+}
+
 type fakeClock struct {
 	time time.Time
 }
