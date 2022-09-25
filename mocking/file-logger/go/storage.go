@@ -6,12 +6,12 @@ import (
 )
 
 type FileStorage interface {
-	AppendStringToFile(fileName string, message string) (err error)
+	AppendStringToFile(fileName, message string) error
 }
 
 type localFileStorage struct{}
 
-func (s *localFileStorage) AppendStringToFile(fileName string, message string) (err error) {
+func (s *localFileStorage) AppendStringToFile(fileName, message string) error {
 	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	// file not found, creating a new one
