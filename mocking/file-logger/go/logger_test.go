@@ -7,49 +7,48 @@ import (
 )
 
 type InMemoryFileStorage struct {
-	Logs []string
-	Log  map[string][]string
+	Logs map[string][]string
 }
 
 func (s *InMemoryFileStorage) AppendStringToFile(fileName, message string) error {
-	s.Logs = append(s.Logs, message)
-
-	if s.Log == nil {
-		s.Log = make(map[string][]string)
+	if s.Logs == nil {
+		s.Logs = make(map[string][]string)
 	}
 
-	if s.Log[fileName] == nil {
-		s.Log[fileName] = []string{}
+	logs, exist := s.Logs[fileName]
+
+	if !exist {
+		s.Logs[fileName] = []string{}
 	}
 
-	s.Log[fileName] = append(s.Log[fileName], message)
+	s.Logs[fileName] = append(logs, message)
 
 	return nil
 }
 
 func (s *InMemoryFileStorage) FileExists(fileName string) bool {
-	if s.Log == nil {
+	if s.Logs == nil {
 		return false
 	}
 
-	if s.Log[fileName] == nil {
-		return false
-	}
+	_, exist := s.Logs[fileName]
 
-	return true
+	return exist
 }
 
 func (s *InMemoryFileStorage) RenameFile(oldPath, newPath string) error {
-	if s.Log == nil {
+	if s.Logs == nil {
 		return nil
 	}
 
-	if s.Log[oldPath] == nil {
+	logs, exist := s.Logs[oldPath]
+
+	if !exist {
 		return nil
 	}
 
-	s.Log[newPath] = s.Log[oldPath]
-	delete(s.Log, oldPath)
+	s.Logs[newPath] = logs
+	delete(s.Logs, oldPath)
 
 	return nil
 }
@@ -81,12 +80,12 @@ func TestLogWritesToFileWithCurrentDateOnWeekday(t *testing.T) {
 
 	expectedFileName := "log20220922.txt"
 
-	if storage.Log[expectedFileName] == nil {
+	logs, exist := storage.Logs[expectedFileName]
+
+	if !exist {
 		t.Log("File " + expectedFileName + " not created")
 		t.Fail()
 	}
-
-	logs := storage.Log[expectedFileName]
 
 	// then
 	if len(logs) != 2 {
@@ -114,12 +113,12 @@ func TestLogWritesToFileWithCurrentDateOnSaturday(t *testing.T) {
 
 	expectedFileName := "weekend.txt"
 
-	if storage.Log[expectedFileName] == nil {
+	logs, exist := storage.Logs[expectedFileName]
+
+	if !exist {
 		t.Log("File " + expectedFileName + " not created")
 		t.Fail()
 	}
-
-	logs := storage.Log[expectedFileName]
 
 	// then
 	if len(logs) != 2 {
@@ -147,12 +146,12 @@ func TestLogWritesToFileWithCurrentDateOnSunday(t *testing.T) {
 
 	expectedFileName := "weekend.txt"
 
-	if storage.Log[expectedFileName] == nil {
+	logs, exist := storage.Logs[expectedFileName]
+
+	if !exist {
 		t.Log("File " + expectedFileName + " not created")
 		t.Fail()
 	}
-
-	logs := storage.Log[expectedFileName]
 
 	// then
 	if len(logs) != 2 {
