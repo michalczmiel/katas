@@ -11,7 +11,7 @@ type InMemoryFileStorage struct {
 	Log  map[string][]string
 }
 
-func (s *InMemoryFileStorage) AppendStringToFile(fileName string, message string) (err error) {
+func (s *InMemoryFileStorage) AppendStringToFile(fileName, message string) error {
 	s.Logs = append(s.Logs, message)
 
 	if s.Log == nil {
