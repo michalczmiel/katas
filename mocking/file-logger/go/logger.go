@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+const (
+	DefaultWeekendFileName = "weekend.txt"
+)
+
 type FileLogger struct {
 	storage FileStorage
 	clock   Clock
@@ -12,15 +16,11 @@ type FileLogger struct {
 func (l *FileLogger) getFileName() string {
 	currentTime := l.clock.Now()
 
-	var fileName string
-
-	if IsWeekend(currentTime) {
-		fileName = "weekend.txt"
-	} else {
-		fileName = "log" + currentTime.Format("20060102") + ".txt"
+	if !IsWeekend(currentTime) {
+		return "log" + currentTime.Format("20060102") + ".txt"
 	}
 
-	return fileName
+	return DefaultWeekendFileName
 }
 
 func (l *FileLogger) Log(message string) {
