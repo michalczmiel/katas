@@ -3,15 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 type FileStorage interface {
 	AppendStringToFile(fileName string, message string) (err error)
 }
 
-type LocalFileStorage struct{}
+type localFileStorage struct{}
 
-func (s *LocalFileStorage) AppendStringToFile(fileName string, message string) (err error) {
+func (s *localFileStorage) AppendStringToFile(fileName string, message string) (err error) {
 	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	// file not found, creating a new one
@@ -37,12 +38,21 @@ func (s *LocalFileStorage) AppendStringToFile(fileName string, message string) (
 }
 
 type FileLogger struct {
-	fileName string
-	storage  FileStorage
+	storage FileStorage
+}
+
+func (l *FileLogger) getFileName() string {
+	currentTime := time.Now()
+
+	fileName := "log" + currentTime.Format("20060102") + ".txt"
+
+	return fileName
 }
 
 func (l *FileLogger) Log(message string) {
-	err := l.storage.AppendStringToFile(l.fileName, message)
+	fileName := l.getFileName()
+
+	err := l.storage.AppendStringToFile(fileName, message)
 
 	if err != nil {
 		fmt.Println(err)
@@ -50,7 +60,7 @@ func (l *FileLogger) Log(message string) {
 }
 
 func main() {
-	storage := &LocalFileStorage{}
-	logger := FileLogger{"log.txt", storage}
+	storage := &localFileStorage{}
+	logger := FileLogger{storage}
 	logger.Log("Hello world!")
 }
