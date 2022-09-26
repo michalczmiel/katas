@@ -14,15 +14,15 @@ type FileLogger struct {
 	clock   clock
 }
 
-func (FileLogger) formatWeekdayFile(currentTime *time.Time) string {
+func formatWeekdayFile(currentTime *time.Time) string {
 	return "log" + currentTime.Format("20060102") + ".txt"
 }
 
-func (FileLogger) formatPreviousWeekendFile(modTime *time.Time) string {
+func formatPreviousWeekendFile(modTime *time.Time) string {
 	return "weekend-" + modTime.Format("20060102") + ".txt"
 }
 
-func (FileLogger) wasFileModifiedThisWeekend(currentTime, modTime *time.Time) bool {
+func wasFileModifiedThisWeekend(currentTime, modTime *time.Time) bool {
 	var currentWeekBeginning time.Time
 
 	if currentTime.Weekday() == time.Saturday {
@@ -45,7 +45,7 @@ func (l *FileLogger) getFileName() (error, string) {
 	currentTime := l.clock.Now()
 
 	if !IsWeekend(currentTime) {
-		return nil, l.formatWeekdayFile(&currentTime)
+		return nil, formatWeekdayFile(&currentTime)
 	}
 
 	if !l.storage.FileExists(DefaultWeekendFileName) {
@@ -59,7 +59,7 @@ func (l *FileLogger) getFileName() (error, string) {
 		return err, ""
 	}
 
-	if l.wasFileModifiedThisWeekend(&currentTime, modTime) {
+	if wasFileModifiedThisWeekend(&currentTime, modTime) {
 		return nil, DefaultWeekendFileName
 	}
 
@@ -73,7 +73,7 @@ func (l *FileLogger) getFileName() (error, string) {
 		previousSaturday = &saturday
 	}
 
-	newFileName := l.formatPreviousWeekendFile(previousSaturday)
+	newFileName := formatPreviousWeekendFile(previousSaturday)
 
 	// rename the old file created in past weekend
 	err = l.storage.RenameFile(DefaultWeekendFileName, newFileName)
