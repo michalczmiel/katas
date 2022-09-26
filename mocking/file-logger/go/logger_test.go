@@ -12,10 +12,6 @@ type InMemoryFileStorage struct {
 }
 
 func (s *InMemoryFileStorage) AppendStringToFile(path, message string) error {
-	if s.Logs == nil {
-		s.Logs = make(map[string][]string)
-	}
-
 	logs, exist := s.Logs[path]
 
 	if !exist {
@@ -28,20 +24,12 @@ func (s *InMemoryFileStorage) AppendStringToFile(path, message string) error {
 }
 
 func (s *InMemoryFileStorage) FileExists(path string) bool {
-	if s.Logs == nil {
-		return false
-	}
-
 	_, exist := s.Logs[path]
 
 	return exist
 }
 
 func (s *InMemoryFileStorage) RenameFile(oldPath, newPath string) error {
-	if s.Logs == nil {
-		return nil
-	}
-
 	logs, exist := s.Logs[oldPath]
 
 	if !exist {
@@ -66,6 +54,10 @@ func (s *InMemoryFileStorage) FileModificationTime(path string) (*time.Time, err
 	return &modTime, nil
 }
 
+func NewEmptyInMemoryFileStorage() *InMemoryFileStorage {
+	return &InMemoryFileStorage{Logs: make(map[string][]string)}
+}
+
 type fakeClock struct {
 	time time.Time
 }
@@ -76,7 +68,7 @@ func (c fakeClock) Now() time.Time {
 
 func TestLogWritesToNewFileWithCurrentDateOnWeekday(t *testing.T) {
 	// given
-	storage := &InMemoryFileStorage{}
+	storage := NewEmptyInMemoryFileStorage()
 	clock := fakeClock{time.Date(2022, 9, 22, 10, 0, 0, 0, time.UTC)}
 	logger := FileLogger{storage, clock}
 
@@ -122,7 +114,7 @@ func TestLogWritesToExistingFileWithCurrentDateOnWeekday(t *testing.T) {
 
 func TestLogWritesToNewFileWithCurrentDateOnSaturday(t *testing.T) {
 	// given
-	storage := &InMemoryFileStorage{}
+	storage := NewEmptyInMemoryFileStorage()
 	clock := fakeClock{time.Date(2022, 9, 24, 10, 0, 0, 0, time.UTC)}
 	logger := FileLogger{storage, clock}
 
@@ -144,7 +136,7 @@ func TestLogWritesToNewFileWithCurrentDateOnSaturday(t *testing.T) {
 
 func TestLogWritesToExistingFileWithCurrentDateOnSaturday(t *testing.T) {
 	// given
-	storage := &InMemoryFileStorage{}
+	storage := NewEmptyInMemoryFileStorage()
 	clock := fakeClock{time.Date(2022, 9, 24, 10, 0, 0, 0, time.UTC)}
 	logger := FileLogger{storage, clock}
 
