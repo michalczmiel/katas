@@ -43,17 +43,11 @@ func (localFileStorage) AppendStringToFile(path, message string) error {
 func (localFileStorage) FileExists(path string) bool {
 	_, err := os.Stat(path)
 
-	if errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-
-	return true
+	return !errors.Is(err, os.ErrNotExist)
 }
 
 func (localFileStorage) RenameFile(oldPath, newPath string) error {
-	err := os.Rename(oldPath, newPath)
-
-	return err
+	return os.Rename(oldPath, newPath)
 }
 
 func (localFileStorage) FileModificationTime(path string) (*time.Time, error) {
