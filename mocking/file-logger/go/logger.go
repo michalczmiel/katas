@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -40,25 +41,26 @@ func (FileLogger) wasFileModifiedThisWeekend(currentTime, modTime *time.Time) bo
 	return false
 }
 
-func (l *FileLogger) getFileName() string {
+func (l *FileLogger) getFileName() (error, string) {
 	currentTime := l.clock.Now()
 
 	if !IsWeekend(currentTime) {
-		return l.formatWeekdayFile(&currentTime)
+		return nil, l.formatWeekdayFile(&currentTime)
 	}
 
 	if !l.storage.FileExists(DefaultWeekendFileName) {
-		return DefaultWeekendFileName
+		return nil, DefaultWeekendFileName
 	}
 
 	modTime, err := l.storage.FileModificationTime(DefaultWeekendFileName)
 
 	if err != nil {
-		panic("Couldn't get the modification time from " + DefaultWeekendFileName)
+		fmt.Printf("Couldn't get the modification time from %v", DefaultWeekendFileName)
+		return err, ""
 	}
 
 	if l.wasFileModifiedThisWeekend(&currentTime, modTime) {
-		return DefaultWeekendFileName
+		return nil, DefaultWeekendFileName
 	}
 
 	var previousSaturday *time.Time
@@ -76,16 +78,21 @@ func (l *FileLogger) getFileName() string {
 	// rename the old file created in past weekend
 	err = l.storage.RenameFile(DefaultWeekendFileName, newFileName)
 	if err != nil {
-		panic("Couldn't rename old " + DefaultWeekendFileName)
+		fmt.Printf("Couldn't rename old %v", DefaultWeekendFileName)
+		return err, ""
 	}
 
-	return DefaultWeekendFileName
+	return nil, DefaultWeekendFileName
 }
 
 func (l *FileLogger) Log(message string) {
-	fileName := l.getFileName()
+	err, fileName := l.getFileName()
 
-	err := l.storage.AppendStringToFile(fileName, message)
+	if err != nil {
+		panic("Couldn't open or create a file" + fileName)
+	}
+
+	err = l.storage.AppendStringToFile(fileName, message)
 
 	if err != nil {
 		panic("Couldn't write to a file " + fileName)
