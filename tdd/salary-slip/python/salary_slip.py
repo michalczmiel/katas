@@ -72,87 +72,61 @@ class SalarySlipCalculator:
     max_tax_allowance = Decimal(11000)
     tax_rate = Decimal(0.20)
 
-    @classmethod
-    def should_pay_national_insurance_contributions(
+    def _should_pay_national_insurance_contributions(
         self, annual_gross: Decimal
     ) -> bool:
         return annual_gross > self.insurance_contribution_minimum_annual_gross
 
-    @classmethod
-    def should_pay_taxes(cls, annual_gross: Decimal) -> bool:
-        return annual_gross > cls.max_tax_allowance
+    def _is_income_taxable(self, annual_gross: Decimal) -> bool:
+        return annual_gross > self.max_tax_allowance
 
-    @classmethod
     def calculate_national_insurance_contribution(
-        cls, annual_gross: Decimal
+        self, annual_gross: Decimal
     ) -> Decimal:
-        taxable_amount = annual_gross - cls.insurance_contribution_minimum_annual_gross
-
-        return taxable_amount * cls.insurance_contribution_rate / cls.months_in_year
-
-    @classmethod
-    def calculate_taxable_income(cls, annual_gross: Decimal) -> Decimal:
-        if not cls.should_pay_taxes(annual_gross):
+        if not self._should_pay_national_insurance_contributions(annual_gross):
             return Decimal(0)
 
-        annual_taxable_income = annual_gross - cls.max_tax_allowance
+        taxable_amount = annual_gross - self.insurance_contribution_minimum_annual_gross
 
-        return annual_taxable_income / cls.months_in_year
+        return taxable_amount * self.insurance_contribution_rate / self.months_in_year
 
-    @classmethod
-    def calculate_tax_free_allowance(cls, annual_gross: Decimal) -> Decimal:
-        if not cls.should_pay_taxes(annual_gross):
+    def calculate_taxable_income(self, annual_gross: Decimal) -> Decimal:
+        if not self._is_income_taxable(annual_gross):
             return Decimal(0)
 
-        return cls.max_tax_allowance / cls.months_in_year
+        annual_taxable_income = annual_gross - self.max_tax_allowance
 
-    @classmethod
-    def calculate_tax_payable(cls, annual_gross: Decimal) -> Decimal:
-        taxable_income = cls.calculate_taxable_income(annual_gross)
+        return annual_taxable_income / self.months_in_year
 
-        return taxable_income * cls.tax_rate
+    def calculate_tax_free_allowance(self, annual_gross: Decimal) -> Decimal:
+        if not self._is_income_taxable(annual_gross):
+            return Decimal(0)
 
-    @classmethod
-    def calculate_gross_salary(cls, annual_gross: Decimal) -> Decimal:
-        return annual_gross / cls.months_in_year
+        return self.max_tax_allowance / self.months_in_year
+
+    def calculate_tax_payable(self, annual_gross: Decimal) -> Decimal:
+        taxable_income = self.calculate_taxable_income(annual_gross)
+
+        return taxable_income * self.tax_rate
+
+    def calculate_gross_salary(self, annual_gross: Decimal) -> Decimal:
+        return annual_gross / self.months_in_year
 
 
 class SalarySlipGenerator:
     def generate_for(self, employee: Employee) -> SalarySlip:
-        gross_salary = SalarySlipCalculator.calculate_gross_salary(
-            employee.annual_gross
-        )
-
-        should_pay_national_insurance_contributions = (
-            SalarySlipCalculator.should_pay_national_insurance_contributions(
-                employee.annual_gross
-            )
-        )
-
-        national_insurance_contribution = (
-            SalarySlipCalculator.calculate_national_insurance_contribution(
-                employee.annual_gross
-            )
-            if should_pay_national_insurance_contributions
-            else None
-        )
-
-        tax_free_allowance = SalarySlipCalculator.calculate_tax_free_allowance(
-            employee.annual_gross
-        )
-
-        taxable_income = SalarySlipCalculator.calculate_taxable_income(
-            employee.annual_gross
-        )
-
-        tax_payable = SalarySlipCalculator.calculate_tax_payable(employee.annual_gross)
+        calculator = SalarySlipCalculator()
 
         return SalarySlip(
             employee_id=employee.id,
             employee_name=employee.name,
-            gross_salary=gross_salary,
-            national_insurance_contribution=national_insurance_contribution,
-            tax_free_allowance=tax_free_allowance,
-            tax_payable=tax_payable,
-            taxable_income=taxable_income,
+            gross_salary=calculator.calculate_gross_salary(employee.annual_gross),
+            national_insurance_contribution=calculator.calculate_national_insurance_contribution(
+                employee.annual_gross
+            ),
+            tax_free_allowance=calculator.calculate_tax_free_allowance(
+                employee.annual_gross
+            ),
+            tax_payable=calculator.calculate_tax_payable(employee.annual_gross),
+            taxable_income=calculator.calculate_taxable_income(employee.annual_gross),
         )
