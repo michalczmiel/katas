@@ -19,5 +19,4 @@ def step_impl(context):
 
 @then("the monthly salary slip should contain the below")
 def step_impl(context):
-    print(context.salary_slip)
     assert context.text == str(context.salary_slip)
