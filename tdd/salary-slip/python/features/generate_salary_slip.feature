@@ -18,4 +18,5 @@ Feature: Generate salary slip
       Employee ID: 12345
       Employee Name: John J Doe
       Gross Salary: £755.00
+      National Insurance contributions: £10.00
       """
