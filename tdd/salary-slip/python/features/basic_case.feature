@@ -9,3 +9,13 @@ Feature: Basic case
       Employee Name: John J Doe
       Gross Salary: £416.67
       """
+
+  Scenario: For annual salary of £22,000.00
+    Given I have an employee Jane J Doe with an annual gross salary of £22,000.00
+    When I generate a monthly salary slip for the employee
+    Then the monthly salary slip should contain the below:
+      """
+      Employee ID: 12345
+      Employee Name: Jane J Doe
+      Gross Salary: £1833.33
+      """
