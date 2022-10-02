@@ -55,32 +55,31 @@ class SalarySlip:
 
 class SalarySlipCalculator:
     months_in_year = Decimal(12)
-    insurance_contributions_minimum_annual_gross = Decimal(8060)
+    insurance_contribution_minimum_annual_gross = Decimal(8060)
+    insurance_contribution_rate = Decimal(0.12)
 
     @classmethod
     def should_pay_national_insurance_contributions(
         self, annual_gross: Decimal
     ) -> bool:
-        return annual_gross > self.insurance_contributions_minimum_annual_gross
+        return annual_gross > self.insurance_contribution_minimum_annual_gross
 
     @classmethod
     def calculate_national_insurance_contribution(
         cls, annual_gross: Decimal
     ) -> Decimal:
-        gross_subject_to_contribution = (
-            annual_gross - cls.insurance_contributions_minimum_annual_gross
-        )
+        taxable_amount = annual_gross - cls.insurance_contribution_minimum_annual_gross
 
-        return gross_subject_to_contribution * Decimal(0.12) / Decimal(12)
+        return taxable_amount * cls.insurance_contribution_rate / cls.months_in_year
 
     @classmethod
-    def calculate_monthly_gross_salary(cls, annual_gross: Decimal) -> Decimal:
+    def calculate_gross_salary(cls, annual_gross: Decimal) -> Decimal:
         return annual_gross / cls.months_in_year
 
 
 class SalarySlipGenerator:
     def generate_for(self, employee: Employee) -> SalarySlip:
-        gross_salary = SalarySlipCalculator.calculate_monthly_gross_salary(
+        gross_salary = SalarySlipCalculator.calculate_gross_salary(
             employee.annual_gross
         )
 
