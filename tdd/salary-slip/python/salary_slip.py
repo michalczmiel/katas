@@ -57,7 +57,9 @@ class SalarySlip:
             f"Taxable income: {self._format_value(self.taxable_income)}"
             if self.taxable_income
             else None,
-            f"Tax Payable: {self.tax_payable}" if self.tax_payable else None,
+            f"Tax Payable: {self._format_value(self.tax_payable)}"
+            if self.tax_payable
+            else None,
         ]
 
         return "\n".join(filter(bool, lines))
@@ -68,12 +70,17 @@ class SalarySlipCalculator:
     insurance_contribution_minimum_annual_gross = Decimal(8060)
     insurance_contribution_rate = Decimal(0.12)
     max_tax_allowance = Decimal(11000)
+    tax_rate = Decimal(0.20)
 
     @classmethod
     def should_pay_national_insurance_contributions(
         self, annual_gross: Decimal
     ) -> bool:
         return annual_gross > self.insurance_contribution_minimum_annual_gross
+
+    @classmethod
+    def should_pay_taxes(cls, annual_gross: Decimal) -> bool:
+        return annual_gross > cls.max_tax_allowance
 
     @classmethod
     def calculate_national_insurance_contribution(
@@ -85,7 +92,7 @@ class SalarySlipCalculator:
 
     @classmethod
     def calculate_taxable_income(cls, annual_gross: Decimal) -> Decimal:
-        if annual_gross < cls.max_tax_allowance:
+        if not cls.should_pay_taxes(annual_gross):
             return Decimal(0)
 
         annual_taxable_income = annual_gross - cls.max_tax_allowance
@@ -94,14 +101,16 @@ class SalarySlipCalculator:
 
     @classmethod
     def calculate_tax_free_allowance(cls, annual_gross: Decimal) -> Decimal:
-        if annual_gross < cls.max_tax_allowance:
+        if not cls.should_pay_taxes(annual_gross):
             return Decimal(0)
 
         return cls.max_tax_allowance / cls.months_in_year
 
     @classmethod
     def calculate_tax_payable(cls, annual_gross: Decimal) -> Decimal:
-        return Decimal(0)
+        taxable_income = cls.calculate_taxable_income(annual_gross)
+
+        return taxable_income * cls.tax_rate
 
     @classmethod
     def calculate_gross_salary(cls, annual_gross: Decimal) -> Decimal:
