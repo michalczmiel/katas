@@ -88,6 +88,10 @@ class SalarySlipCalculator:
     insurance_contribution_rate = Decimal(0.12)
     max_tax_allowance = Decimal(11000)
     tax_rate = Decimal(0.20)
+    higher_max_tax_allowance = Decimal(43000)
+    higher_tax_rate = Decimal(0.40)
+    higher_insurance_contribution_minimum_annual_gross = Decimal(43000)
+    higher_insurance_contribution_rate = Decimal(0.20)
 
     def _should_pay_national_insurance_contributions(
         self, annual_gross: Decimal
