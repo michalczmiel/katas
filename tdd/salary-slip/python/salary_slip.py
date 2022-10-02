@@ -112,10 +112,29 @@ class SalarySlipCalculator:
         return taxable_amount * self.insurance_contribution_rate / self.months_in_year
 
     def calculate_taxable_income(self, annual_gross: Decimal) -> Decimal:
+        if annual_gross >= self.max_tax_allowance:
+            return (annual_gross - self.max_tax_allowance) / Decimal(12)
+        else:
+            return Decimal(0)
+
+    def _calculate_higher_taxable_income(self, annual_gross: Decimal) -> Decimal:
+        if not annual_gross > self.higher_max_tax_allowance:
+            return Decimal(0)
+
+        annual_taxable_income = annual_gross - self.higher_max_tax_allowance
+
+        return annual_taxable_income / self.months_in_year
+
+    def _calculate_normal_taxable_income(self, annual_gross: Decimal) -> Decimal:
         if not self._is_income_taxable(annual_gross):
             return Decimal(0)
 
-        annual_taxable_income = annual_gross - self.max_tax_allowance
+        if annual_gross > self.higher_max_tax_allowance:
+            maximum_taxable_income = self.higher_max_tax_allowance
+        else:
+            maximum_taxable_income = annual_gross
+
+        annual_taxable_income = maximum_taxable_income - self.max_tax_allowance
 
         return annual_taxable_income / self.months_in_year
 
@@ -126,9 +145,13 @@ class SalarySlipCalculator:
         return self.max_tax_allowance / self.months_in_year
 
     def calculate_tax_payable(self, annual_gross: Decimal) -> Decimal:
-        taxable_income = self.calculate_taxable_income(annual_gross)
+        higher_taxable_income = self._calculate_higher_taxable_income(annual_gross)
+        normal_taxable_income = self._calculate_normal_taxable_income(annual_gross)
 
-        return taxable_income * self.tax_rate
+        return (
+            normal_taxable_income * self.tax_rate
+            + higher_taxable_income * self.higher_tax_rate
+        )
 
     def calculate_gross_salary(self, annual_gross: Decimal) -> Decimal:
         return annual_gross / self.months_in_year
