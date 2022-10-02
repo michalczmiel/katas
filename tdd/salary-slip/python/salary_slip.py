@@ -94,7 +94,10 @@ class SalarySlipCalculator:
 
     @classmethod
     def calculate_tax_free_allowance(cls, annual_gross: Decimal) -> Decimal:
-        return Decimal(0)
+        if annual_gross < cls.max_tax_allowance:
+            return Decimal(0)
+
+        return cls.max_tax_allowance / cls.months_in_year
 
     @classmethod
     def calculate_tax_payable(cls, annual_gross: Decimal) -> Decimal:
