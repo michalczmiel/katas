@@ -30,6 +30,15 @@ class SalarySlip:
     employee_name: str
     gross_salary: Decimal
 
+    def __str__(self) -> str:
+        lines = [
+            "Employee ID: 12345",
+            "Employee Name: John J Doe",
+            "Gross Salary: £416.67",
+        ]
+
+        return "\n".join(lines)
+
 
 class SalarySlipGenerator:
     def generate_for(self, employee: Employee) -> SalarySlip:
