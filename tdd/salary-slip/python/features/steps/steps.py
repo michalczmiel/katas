@@ -5,7 +5,9 @@ from salary_slip import SalarySlipGenerator, Employee
 
 @given("I have an employee {name} with an annual gross salary of {annual_gross}")
 def step_impl(context, name, annual_gross):
-    employee = Employee(id="12345", name=name, annual_gross=annual_gross)
+    employee = Employee.from_formatted_annual_gross(
+        id="12345", name=name, formatted_annual_gross=annual_gross
+    )
 
     context.employee = employee
 

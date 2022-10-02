@@ -1,5 +1,8 @@
 from dataclasses import dataclass
+import re
 from decimal import Decimal
+
+from babel.numbers import parse_decimal
 
 
 @dataclass
@@ -7,6 +10,18 @@ class Employee:
     id: str
     name: str
     annual_gross: Decimal
+
+    @classmethod
+    def from_formatted_annual_gross(
+        cls, id: str, name: str, formatted_annual_gross: str, locale: str = "en_GB"
+    ) -> "Employee":
+        formatted_annual_gross_without_currency = re.sub(
+            "[^0-9|.,]", "", formatted_annual_gross
+        )
+
+        annual_gross = parse_decimal(formatted_annual_gross_without_currency, locale)
+
+        return cls(id, name, annual_gross)
 
 
 @dataclass
