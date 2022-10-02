@@ -84,32 +84,48 @@ class SalarySlip:
 
 class SalarySlipCalculator:
     months_in_year = Decimal(12)
-    insurance_contribution_minimum_annual_gross = Decimal(8060)
-    insurance_contribution_rate = Decimal(0.12)
     max_tax_allowance = Decimal(11000)
     tax_rate = Decimal(0.20)
     higher_max_tax_allowance = Decimal(43000)
     higher_tax_rate = Decimal(0.40)
+    insurance_contribution_minimum_annual_gross = Decimal(8060)
+    insurance_contribution_rate = Decimal(0.12)
     higher_insurance_contribution_minimum_annual_gross = Decimal(43000)
-    higher_insurance_contribution_rate = Decimal(0.20)
-
-    def _should_pay_national_insurance_contributions(
-        self, annual_gross: Decimal
-    ) -> bool:
-        return annual_gross > self.insurance_contribution_minimum_annual_gross
+    higher_insurance_contribution_rate = Decimal(0.02)
 
     def _is_income_taxable(self, annual_gross: Decimal) -> bool:
         return annual_gross > self.max_tax_allowance
 
+    def calculate_higher_national_insurance_contribution(self, annual_gross: Decimal) -> Decimal:
+        if annual_gross < self.higher_insurance_contribution_minimum_annual_gross:
+            return Decimal(0)
+
+        annual_taxable_amount = annual_gross - self.higher_insurance_contribution_minimum_annual_gross
+
+        return annual_taxable_amount * self.higher_insurance_contribution_rate
+
+    def calculate_normal_national_insurance_contribution(
+        self, annual_gross: Decimal
+    ) -> Decimal:
+        if annual_gross < self.insurance_contribution_minimum_annual_gross:
+            return Decimal(0)
+
+        if annual_gross > self.higher_insurance_contribution_minimum_annual_gross:
+            maximum_taxable_income = self.higher_insurance_contribution_minimum_annual_gross
+        else:
+            maximum_taxable_income = annual_gross
+
+        taxable_amount = maximum_taxable_income - self.insurance_contribution_minimum_annual_gross
+
+        return taxable_amount * self.insurance_contribution_rate
+
     def calculate_national_insurance_contribution(
         self, annual_gross: Decimal
     ) -> Decimal:
-        if not self._should_pay_national_insurance_contributions(annual_gross):
-            return Decimal(0)
+        normal_contribution = self.calculate_normal_national_insurance_contribution(annual_gross)
+        higher_contribution = self.calculate_higher_national_insurance_contribution(annual_gross)
 
-        taxable_amount = annual_gross - self.insurance_contribution_minimum_annual_gross
-
-        return taxable_amount * self.insurance_contribution_rate / self.months_in_year
+        return (normal_contribution + higher_contribution) / self.months_in_year
 
     def calculate_taxable_income(self, annual_gross: Decimal) -> Decimal:
         if annual_gross >= self.max_tax_allowance:
@@ -118,7 +134,7 @@ class SalarySlipCalculator:
             return Decimal(0)
 
     def _calculate_higher_taxable_income(self, annual_gross: Decimal) -> Decimal:
-        if not annual_gross > self.higher_max_tax_allowance:
+        if annual_gross < self.higher_max_tax_allowance:
             return Decimal(0)
 
         annual_taxable_income = annual_gross - self.higher_max_tax_allowance
