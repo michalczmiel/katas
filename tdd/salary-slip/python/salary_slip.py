@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from decimal import Decimal
 
-from babel.numbers import parse_decimal
+from babel.numbers import parse_decimal, format_currency
 
 
 @dataclass
@@ -30,20 +30,37 @@ class SalarySlip:
     employee_name: str
     gross_salary: Decimal
 
+    def _format_value(
+        self, value: Decimal, currency: str = "GBP", locale="en_GB"
+    ) -> str:
+        return format_currency(value, currency=currency, locale=locale)
+
     def __str__(self) -> str:
         lines = [
             f"Employee ID: {self.employee_id}",
             f"Employee Name: {self.employee_name}",
-            "Gross Salary: £416.67",
+            f"Gross Salary: {self._format_value(self.gross_salary)}",
         ]
 
         return "\n".join(lines)
 
 
+class SalarySlipCalculator:
+    months_in_year = Decimal(12)
+
+    @classmethod
+    def calculate_monthly_gross_salary(cls, annual_gross: Decimal) -> Decimal:
+        return annual_gross / cls.months_in_year
+
+
 class SalarySlipGenerator:
     def generate_for(self, employee: Employee) -> SalarySlip:
+        gross_salary = SalarySlipCalculator.calculate_monthly_gross_salary(
+            employee.annual_gross
+        )
+
         return SalarySlip(
             employee_id=employee.id,
             employee_name=employee.name,
-            gross_salary=employee.annual_gross,
+            gross_salary=gross_salary,
         )
