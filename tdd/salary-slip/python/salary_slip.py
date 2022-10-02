@@ -32,8 +32,8 @@ class SalarySlip:
 
     def __str__(self) -> str:
         lines = [
-            "Employee ID: 12345",
-            "Employee Name: John J Doe",
+            f"Employee ID: {self.employee_id}",
+            f"Employee Name: {self.employee_name}",
             "Gross Salary: £416.67",
         ]
 
