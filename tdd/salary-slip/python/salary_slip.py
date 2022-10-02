@@ -1,8 +1,12 @@
 import re
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, getcontext
+from typing import Optional
 
 from babel.numbers import parse_decimal, format_currency
+
+
+getcontext().prec = 16
 
 
 @dataclass
@@ -29,6 +33,7 @@ class SalarySlip:
     employee_id: str
     employee_name: str
     gross_salary: Decimal
+    national_insurance_contribution: Optional[Decimal]
 
     def _format_value(
         self, value: Decimal, currency: str = "GBP", locale="en_GB"
@@ -40,13 +45,33 @@ class SalarySlip:
             f"Employee ID: {self.employee_id}",
             f"Employee Name: {self.employee_name}",
             f"Gross Salary: {self._format_value(self.gross_salary)}",
+            f"National Insurance contributions: {self._format_value(self.national_insurance_contribution)}"
+            if self.national_insurance_contribution
+            else None,
         ]
 
-        return "\n".join(lines)
+        return "\n".join(filter(bool, lines))
 
 
 class SalarySlipCalculator:
     months_in_year = Decimal(12)
+    insurance_contributions_minimum_annual_gross = Decimal(8060)
+
+    @classmethod
+    def should_pay_national_insurance_contributions(
+        self, annual_gross: Decimal
+    ) -> bool:
+        return annual_gross > self.insurance_contributions_minimum_annual_gross
+
+    @classmethod
+    def calculate_national_insurance_contribution(
+        cls, annual_gross: Decimal
+    ) -> Decimal:
+        gross_subject_to_contribution = (
+            annual_gross - cls.insurance_contributions_minimum_annual_gross
+        )
+
+        return gross_subject_to_contribution * Decimal(0.12) / Decimal(12)
 
     @classmethod
     def calculate_monthly_gross_salary(cls, annual_gross: Decimal) -> Decimal:
@@ -59,8 +84,23 @@ class SalarySlipGenerator:
             employee.annual_gross
         )
 
+        should_pay_national_insurance_contributions = (
+            SalarySlipCalculator.should_pay_national_insurance_contributions(
+                employee.annual_gross
+            )
+        )
+
+        national_insurance_contribution = (
+            SalarySlipCalculator.calculate_national_insurance_contribution(
+                employee.annual_gross
+            )
+            if should_pay_national_insurance_contributions
+            else None
+        )
+
         return SalarySlip(
             employee_id=employee.id,
             employee_name=employee.name,
             gross_salary=gross_salary,
+            national_insurance_contribution=national_insurance_contribution,
         )
