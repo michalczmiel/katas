@@ -10,10 +10,9 @@ class TaxCalculator:
     higher_tax_rate = Decimal(0.40)
 
     def calculate_annual_taxable_income(self, annual_gross: Decimal) -> Decimal:
-        if annual_gross >= self.max_tax_allowance:
-            return annual_gross - self.max_tax_allowance
-        else:
-            return Decimal(0)
+        annual__tax_allowance = self.calculate_annual_tax_free_allowance(annual_gross)
+
+        return annual_gross - annual__tax_allowance
 
     def calculate_annual_tax_free_allowance(self, annual_gross: Decimal) -> Decimal:
         if annual_gross > self.max_tax_allowance:
