@@ -4,6 +4,12 @@ from game_of_life import game_of_life
 
 
 class GameOfLifeTestCase(unittest.TestCase):
+    def test_empty(self):
+        board = []
+
+        with self.assertRaises(Exception):
+            game_of_life(board)
+
     def test_3_by_4(self):
         board = [[0, 1, 0], [0, 0, 1], [1, 1, 1], [0, 0, 0]]
 
