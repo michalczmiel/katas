@@ -38,10 +38,25 @@ def get_item_priorities_sum(rucksacks: list[str]):
     return priorities_sum
 
 
+def get_item_types_priorities_sum(rucksacks: list[str], group_size: int = 3):
+    priorities_sum = 0
+
+    for g in range(0, len(rucksacks), group_size):
+        # compute unique items in each rucksack for a given group
+        unique_items_in_group = {r: set(rucksacks[g + r]) for r in range(0, group_size)}
+        unique_items = set.intersection(*unique_items_in_group.values())
+        # we assume there is only one unique item type across the group
+        item = unique_items.pop()
+        priorities_sum += get_item_priority(item)
+
+    return priorities_sum
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2022/day/3"""
 
     print(get_item_priorities_sum(read_input("input.txt")))
+    print(get_item_types_priorities_sum(read_input("input.txt")))
 
 
 if __name__ == "__main__":
