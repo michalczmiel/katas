@@ -20,11 +20,26 @@ def count_pairs_fully_contain(pairs: list[Pair]) -> int:
     count = 0
 
     for first, second in pairs:
-        if (
-            first[0] >= second[0]
-            and first[1] <= second[1]
-            or second[0] >= first[0]
-            and second[1] <= first[1]
+        first_min, first_max = first
+        second_min, second_max = second
+
+        if (first_min >= second_min and first_max <= second_max) or (
+            second_min >= first_min and second_max <= first_max
+        ):
+            count += 1
+
+    return count
+
+
+def count_pairs_overlap(pairs: list[Pair]) -> int:
+    count = 0
+
+    for first, second in pairs:
+        first_min, first_max = first
+        second_min, second_max = second
+
+        if (first_min >= second_min and first_min <= second_max) or (
+            second_min >= first_min and second_min <= first_max
         ):
             count += 1
 
@@ -35,6 +50,7 @@ def solution() -> None:
     """Solution to https://adventofcode.com/2022/day/4"""
 
     print(count_pairs_fully_contain(read_input("input.txt")))
+    print(count_pairs_overlap(read_input("input.txt")))
 
 
 if __name__ == "__main__":
