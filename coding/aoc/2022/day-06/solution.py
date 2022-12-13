@@ -3,8 +3,8 @@ def read_input(file_name: str) -> str:
         return file.read()
 
 
-def get_characters_count_before_first_start_of_packet(
-    buffer: str, sequence_length: int = 4
+def get_characters_count_before_unique_sequence(
+    buffer: str, sequence_length: int
 ) -> int:
     right = 0
     left = 0
@@ -28,7 +28,16 @@ def get_characters_count_before_first_start_of_packet(
 def solution() -> None:
     """Solution to https://adventofcode.com/2022/day/6"""
 
-    print(get_characters_count_before_first_start_of_packet(read_input("input.txt")))
+    print(
+        get_characters_count_before_unique_sequence(
+            read_input("input.txt"), sequence_length=4
+        )
+    )
+    print(
+        get_characters_count_before_unique_sequence(
+            read_input("input.txt"), sequence_length=14
+        )
+    )
 
 
 if __name__ == "__main__":
