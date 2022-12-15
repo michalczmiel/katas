@@ -1,46 +1,43 @@
-from typing import NewType
+from dataclasses import dataclass
+from typing import Iterator
 
-Pair = NewType("Pair", tuple[list[int]])
+
+@dataclass(frozen=True)
+class Pair:
+    minimum: int
+    maximum: int
+
+    def contains(self, pair: "Pair") -> bool:
+        return self.minimum >= pair.minimum and self.maximum <= pair.maximum
+
+    def overlaps(self, pair: "Pair") -> bool:
+        return self.minimum >= pair.minimum and self.minimum <= pair.maximum
 
 
-def read_input(file_name: str) -> list[Pair]:
-    pairs = []
-
+def read_input(file_name: str) -> Iterator[Pair]:
     with open(file_name) as file:
         for line in file:
             first, second = line.strip().split(",")
-            first = [int(number) for number in first.split("-")]
-            second = [int(number) for number in second.split("-")]
-
-            pairs.append((first, second))
-    return pairs
+            first_min, first_max = [int(number) for number in first.split("-")]
+            second_min, second_max = [int(number) for number in second.split("-")]
+            yield (Pair(first_min, first_max), Pair(second_min, second_max))
 
 
-def count_pairs_fully_contain(pairs: list[Pair]) -> int:
+def count_pairs_fully_contain(pairs: Iterator[Pair]) -> int:
     count = 0
 
     for first, second in pairs:
-        first_min, first_max = first
-        second_min, second_max = second
-
-        if (first_min >= second_min and first_max <= second_max) or (
-            second_min >= first_min and second_max <= first_max
-        ):
+        if first.contains(second) or second.contains(first):
             count += 1
 
     return count
 
 
-def count_pairs_overlap(pairs: list[Pair]) -> int:
+def count_pairs_overlap(pairs: Iterator[Pair]) -> int:
     count = 0
 
     for first, second in pairs:
-        first_min, first_max = first
-        second_min, second_max = second
-
-        if (first_min >= second_min and first_min <= second_max) or (
-            second_min >= first_min and second_min <= first_max
-        ):
+        if first.overlaps(second) or second.overlaps(first):
             count += 1
 
     return count
