@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Iterator
 
 ROCK = 1
 PAPER = 2
@@ -6,6 +6,7 @@ SCISSORS = 3
 
 WIN_SCORE = 6
 DRAW_SCORE = 3
+LOOSE_SCORE = 0
 
 LOOSE = 1
 DRAW = 2
@@ -16,80 +17,45 @@ PLAYER_SHAPE_MAPPING = {"X": ROCK, "Y": PAPER, "Z": SCISSORS}
 SUGGESTED_MOVE_SHAPE_MAPPING = {"X": LOOSE, "Y": DRAW, "Z": WIN}
 
 
-def read_input(file_name: str) -> List[Tuple[int]]:
-    shapes = []
-
+def read_input(file_name: str) -> Iterator[tuple[str, str]]:
     with open(file_name) as file:
         for line in file:
             opponent, player = line.strip().split(" ")
-            shapes.append((opponent, player))
-    return shapes
+            yield (opponent, player)
 
 
-def get_total_score_based_on_first_strategy(shapes: List[Tuple[str]]) -> int:
+FIRST_STRATEGY = {
+    ROCK: {ROCK: DRAW_SCORE, PAPER: WIN_SCORE, SCISSORS: LOOSE_SCORE},
+    PAPER: {ROCK: LOOSE_SCORE, PAPER: DRAW_SCORE, SCISSORS: WIN_SCORE},
+    SCISSORS: {ROCK: WIN_SCORE, PAPER: LOOSE_SCORE, SCISSORS: DRAW_SCORE},
+}
+
+
+def get_total_score_based_on_first_strategy(shapes: Iterator[tuple[str, str]]) -> int:
     total_score = 0
 
     for opponent_shape, player_shape in shapes:
         opponent_move = OPPONENT_SHAPE_MAPPING[opponent_shape]
         player_move = PLAYER_SHAPE_MAPPING[player_shape]
-
-        if opponent_move == ROCK:
-            if player_move == ROCK:
-                round_score = player_move + DRAW_SCORE
-            elif player_move == PAPER:
-                round_score = player_move + WIN_SCORE
-            else:
-                round_score = player_move
-        elif opponent_move == PAPER:
-            if player_move == ROCK:
-                round_score = player_move
-            elif player_move == PAPER:
-                round_score = player_move + DRAW_SCORE
-            else:
-                round_score = player_move + WIN_SCORE
-        else:
-            if player_move == ROCK:
-                round_score = player_move + WIN_SCORE
-            elif player_move == PAPER:
-                round_score = player_move
-            else:
-                round_score = player_move + DRAW_SCORE
-
-        total_score += round_score
+        total_score += player_move + FIRST_STRATEGY[opponent_move][player_move]
 
     return total_score
 
 
-def get_total_score_based_on_second_strategy(shapes: List[Tuple[str]]) -> int:
+SECOND_STRATEGY = {
+    ROCK: {LOOSE: SCISSORS, DRAW: ROCK + DRAW_SCORE, WIN: PAPER + WIN_SCORE},
+    PAPER: {LOOSE: ROCK, DRAW: PAPER + DRAW_SCORE, WIN: SCISSORS + WIN_SCORE},
+    SCISSORS: {LOOSE: PAPER, DRAW: SCISSORS + DRAW_SCORE, WIN: ROCK + WIN_SCORE},
+}
+
+
+def get_total_score_based_on_second_strategy(shapes: Iterator[tuple[str, str]]) -> int:
     total_score = 0
 
     for opponent_shape, player_shape in shapes:
         opponent_move = OPPONENT_SHAPE_MAPPING[opponent_shape]
         player_suggested_move = SUGGESTED_MOVE_SHAPE_MAPPING[player_shape]
-
-        if opponent_move == ROCK:
-            if player_suggested_move == LOOSE:
-                round_score = SCISSORS
-            elif player_suggested_move == DRAW:
-                round_score = ROCK + DRAW_SCORE
-            else:
-                round_score = PAPER + WIN_SCORE
-        elif opponent_move == PAPER:
-            if player_suggested_move == LOOSE:
-                round_score = ROCK
-            elif player_suggested_move == DRAW:
-                round_score = PAPER + DRAW_SCORE
-            else:
-                round_score = SCISSORS + WIN_SCORE
-        else:
-            if player_suggested_move == LOOSE:
-                round_score = PAPER
-            elif player_suggested_move == DRAW:
-                round_score = SCISSORS + DRAW_SCORE
-            else:
-                round_score = ROCK + WIN_SCORE
-
-        total_score += round_score
+        total_score += SECOND_STRATEGY[opponent_move][player_suggested_move]
 
     return total_score
 
