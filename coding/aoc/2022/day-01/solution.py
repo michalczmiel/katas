@@ -1,25 +1,19 @@
-from typing import List
+from typing import Iterator
 
 
-def read_input(file_name: str) -> List:
+def read_input(file_name: str) -> Iterator[list[int]]:
     inventories = []
     inventory = []
     with open(file_name) as file:
         for line in file:
             if line == "\n":
-                inventories.append(inventory)
+                yield inventory
                 inventory = []
-                continue
             else:
                 inventory.append(int(line.strip()))
 
-    if inventory:
-        inventories.append(inventory)
 
-    return inventories
-
-
-def get_top_carried_calories(inventories: List[List[int]], max_count: int = 3) -> int:
+def get_top_carried_calories(inventories: Iterator[list[int]], max_count: int = 3) -> int:
     max_calories = []
     to_insert = None
 
@@ -51,7 +45,7 @@ def get_top_carried_calories(inventories: List[List[int]], max_count: int = 3) -
     return sum(max_calories)
 
 
-def get_most_carried_calories(inventories: List[List[int]]) -> int:
+def get_most_carried_calories(inventories: Iterator[list[int]]) -> int:
     max_calories = 0
 
     for inventory in inventories:
