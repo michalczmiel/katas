@@ -35,10 +35,26 @@ def count_yes_answers(groups: list[list[Question]]) -> int:
     return yes_answers
 
 
+def count_unanimous_yes_answers(groups: list[list[Question]]) -> int:
+    answers = 0
+
+    for group in groups:
+        counter = Counter()
+        for questions in group:
+            counter.update(questions)
+
+        for answer_count in counter.values():
+            if answer_count == len(group):
+                answers += 1
+
+    return answers
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2020/day/6"""
 
     print(count_yes_answers(read_input()))
+    print(count_unanimous_yes_answers(read_input()))
 
 
 if __name__ == "__main__":
