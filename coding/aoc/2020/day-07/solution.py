@@ -35,29 +35,47 @@ def can_bag_contain(
     if searched_color in color_rules:
         return True
 
-    for rule_color, rule_quantity in color_rules.items():
-        if can_bag_contain(rules, rule_color, searched_color):
-            return True
+    return any(
+        can_bag_contain(rules, rule_color, searched_color)
+        for rule_color in color_rules.keys()
+    )
 
-    return False
 
-
-def count_bag_colors(rules: dict[Color, BagRule]) -> int:
+def count_bag_colors(rules: dict[Color, BagRule], searched_color: Color) -> int:
     count = 0
 
-    owned_color = "shiny gold"
-
-    for color, color_rules in rules.items():
-        if can_bag_contain(rules, color, owned_color):
+    for color in rules.keys():
+        if can_bag_contain(rules, color, searched_color):
             count += 1
 
     return count
 
 
+def count_bags_inside_bag(rules: dict[Color, BagRule], searched_color: Color) -> int:
+    color_rules = rules[searched_color]
+
+    if not color_rules:
+        return 0
+
+    total_count = 0
+
+    for rule_color, rule_quantity in color_rules.items():
+        total_count += rule_quantity
+
+        count = count_bags_inside_bag(rules, rule_color)
+
+        total_count += rule_quantity * count
+
+    return total_count
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2020/day/7"""
 
-    print(count_bag_colors(read_input()))
+    owned_color = "shiny gold"
+
+    print(count_bag_colors(read_input(), owned_color))
+    print(count_bags_inside_bag(read_input(), owned_color))
 
 
 if __name__ == "__main__":
