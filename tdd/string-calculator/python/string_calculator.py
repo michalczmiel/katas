@@ -53,12 +53,20 @@ class NoNegativeNumbersValidator:
         )
 
 
+class MaxNumberValidator:
+    def __init__(self, max_number: int) -> None:
+        self._max_number = max_number
+
+    def validate(self, numbers: list[int]) -> list[int]:
+        return [number for number in numbers if number <= self._max_number]
+
+
 class StringCalculator:
     def __init__(self) -> None:
         self._parser = NumbersParser()
-        self._max_big_number: int = 1000
         self._validators = [
             NoNegativeNumbersValidator(),
+            MaxNumberValidator(max_number=1000),
         ]
 
     def _assert_no_negative_numbers(self, numbers: list[int]) -> None:
@@ -82,7 +90,5 @@ class StringCalculator:
 
         for validator in self._validators:
             numbers = validator.validate(numbers)
-
-        numbers = self._ignore_big_numbers(numbers)
 
         return sum(numbers)
