@@ -1,17 +1,16 @@
 import re
-from typing import Iterable, List, Tuple
 
 
 class StringCalculator:
     def __init__(self) -> None:
-        self._default_delimiters: Tuple[str] = (",", "\n")
+        self._default_delimiters: tuple[str] = (",", "\n")
         self._max_big_number: int = 1000
         self._delimiter_change_chars: str = "//"
 
     def _has_single_char_delimiter(self, delimiter_part: str) -> bool:
         return len(self._delimiter_change_chars) + 1 == len(delimiter_part)
 
-    def _parse_raw_numbers(self, raw_numbers: str) -> Tuple[str, List[str]]:
+    def _parse_raw_numbers(self, raw_numbers: str) -> tuple[str, list[str]]:
         if not raw_numbers.startswith(self._delimiter_change_chars):
             return raw_numbers, []
 
@@ -24,7 +23,7 @@ class StringCalculator:
         custom_delimiters = re.findall(r"\[(.*?)\]", delimiter_part)
         return numbers_part, custom_delimiters
 
-    def _assert_no_negative_numbers(self, numbers: Iterable[int]) -> None:
+    def _assert_no_negative_numbers(self, numbers: list[int]) -> None:
         negative_numbers = [str(number) for number in numbers if number < 0]
         if not negative_numbers:
             return
@@ -34,12 +33,12 @@ class StringCalculator:
             f"negatives not allowed, but found {', '.join(negative_numbers)}"
         )
 
-    def _ignore_big_numbers(self, numbers: List[int]) -> List[int]:
+    def _ignore_big_numbers(self, numbers: list[int]) -> list[int]:
         return [number for number in numbers if number <= self._max_big_number]
 
     def _split_numbers(
-        self, raw_numbers: str, custom_delimiters: List[str]
-    ) -> List[int]:
+        self, raw_numbers: str, custom_delimiters: list[str]
+    ) -> list[int]:
         numbers = raw_numbers
         for custom_delimiter in custom_delimiters:
             numbers = numbers.replace(custom_delimiter, self._default_delimiters[0])
