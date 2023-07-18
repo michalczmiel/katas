@@ -1,3 +1,4 @@
+import abc
 import re
 
 
@@ -40,7 +41,13 @@ class NumbersParser:
         return numbers
 
 
-class NoNegativeNumbersValidator:
+class Validator(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def validate(self, numbers: list[int]) -> list[int]:
+        raise NotImplementedError
+
+
+class NoNegativeNumbersValidator(Validator):
     def validate(self, numbers: list[int]) -> list[int]:
         negative_numbers = [str(number) for number in numbers if number < 0]
 
@@ -53,7 +60,7 @@ class NoNegativeNumbersValidator:
         )
 
 
-class MaxNumberValidator:
+class MaxNumberValidator(Validator):
     def __init__(self, max_number: int) -> None:
         self._max_number = max_number
 
@@ -68,19 +75,6 @@ class StringCalculator:
             NoNegativeNumbersValidator(),
             MaxNumberValidator(max_number=1000),
         ]
-
-    def _assert_no_negative_numbers(self, numbers: list[int]) -> None:
-        negative_numbers = [str(number) for number in numbers if number < 0]
-        if not negative_numbers:
-            return
-        elif len(negative_numbers) == 1:
-            raise Exception("negatives not allowed")
-        raise Exception(
-            f"negatives not allowed, but found {', '.join(negative_numbers)}"
-        )
-
-    def _ignore_big_numbers(self, numbers: list[int]) -> list[int]:
-        return [number for number in numbers if number <= self._max_big_number]
 
     def add(self, raw_numbers: str) -> int:
         if not raw_numbers:
