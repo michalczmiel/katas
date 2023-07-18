@@ -40,10 +40,26 @@ class NumbersParser:
         return numbers
 
 
+class NoNegativeNumbersValidator:
+    def validate(self, numbers: list[int]) -> list[int]:
+        negative_numbers = [str(number) for number in numbers if number < 0]
+
+        if not negative_numbers:
+            return numbers
+        elif len(negative_numbers) == 1:
+            raise Exception("negatives not allowed")
+        raise Exception(
+            f"negatives not allowed, but found {', '.join(negative_numbers)}"
+        )
+
+
 class StringCalculator:
     def __init__(self) -> None:
         self._parser = NumbersParser()
         self._max_big_number: int = 1000
+        self._validators = [
+            NoNegativeNumbersValidator(),
+        ]
 
     def _assert_no_negative_numbers(self, numbers: list[int]) -> None:
         negative_numbers = [str(number) for number in numbers if number < 0]
@@ -64,7 +80,9 @@ class StringCalculator:
 
         numbers = self._parser.parse(raw_numbers)
 
-        self._assert_no_negative_numbers(numbers)
+        for validator in self._validators:
+            numbers = validator.validate(numbers)
+
         numbers = self._ignore_big_numbers(numbers)
 
         return sum(numbers)
