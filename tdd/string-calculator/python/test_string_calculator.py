@@ -92,7 +92,7 @@ def test_ignores_big_numbers(calculator, numbers, expected):
         ("//[%%%%]\n1%%%%2", 3),
     ],
 )
-def test_returns_sum_if_any_length_delimiter_is_changed(calculator, numbers , expected):
+def test_returns_sum_if_any_length_delimiter_is_changed(calculator, numbers, expected):
     assert calculator.add(numbers) == expected
 
 
