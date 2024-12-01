@@ -1,47 +1,44 @@
-import re
-import collections
+from collections import Counter
+from typing import NewType
+
+LocationLists = NewType("LocationLists", tuple[list[int], list[int]])
 
 
-def read_input(file_name: str) -> tuple[list[int], list[int]]:
-    lists = ([], [])
+def read_input(file_name: str) -> LocationLists:
     with open(file_name) as file:
-        for line in file:
-            location_ids = re.findall(r"\d+", line)
+        lines = file.readlines()
 
-            for i, location_id in enumerate(location_ids):
-                lists[i].append(int(location_id))
+    lists = ([], [])
+    for line in lines:
+        location_ids = line.split()
+
+        for i, location_id in enumerate(location_ids):
+            lists[i].append(int(location_id))
 
     return lists
 
 
-def calculate_total_distance_between_lists(lists: tuple[list[int], list[int]]) -> int:
+def calculate_total_distance_between_lists(lists: LocationLists) -> int:
     first, second = lists
+
+    assert len(first) == len(second)
 
     first.sort()
     second.sort()
 
-    total_distance = 0
-
-    for a, b in zip(first, second):
-        distance = abs(a - b)
-        total_distance += distance
+    total_distance = sum(abs(a - b) for a, b in zip(first, second))
 
     return total_distance
 
 
-def calculate_total_similarity_score(lists: tuple[list[int], list[int]]) -> int:
+def calculate_total_similarity_score(lists: LocationLists) -> int:
     first, second = lists
 
-    total_similarity_score = 0
+    counter = Counter(second)
 
-    first_counter = collections.Counter(first)
-    second_counter = collections.Counter(second)
-
-    for number, count in first_counter.items():
-        right_count = second_counter.get(number)
-
-        if right_count is not None:
-            total_similarity_score += number * count * right_count
+    total_similarity_score = sum(
+        number * counter[number] for number in first if number in counter
+    )
 
     return total_similarity_score
 
@@ -49,8 +46,10 @@ def calculate_total_similarity_score(lists: tuple[list[int], list[int]]) -> int:
 def solution() -> None:
     """Solution to https://adventofcode.com/2024/day/1"""
 
-    print(calculate_total_distance_between_lists(read_input("1.txt")))
-    print(calculate_total_similarity_score(read_input("1.txt")))
+    data = read_input("1.txt")
+
+    print(calculate_total_distance_between_lists(data))
+    print(calculate_total_similarity_score(data))
 
 
 if __name__ == "__main__":
