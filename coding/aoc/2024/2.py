@@ -21,14 +21,16 @@ def is_report_safe(report: Report) -> bool:
         previous = report[i - 1]
 
         difference = current - previous
-        ordering = -1 if difference < 0 else 1
-
-        if previous_ordering is None:
-            previous_ordering = ordering
-        elif previous_ordering is not None and previous_ordering != ordering:
-            return False
 
         if abs(difference) < 1 or abs(difference) > 3:
+            return False
+
+        ordering = -1 if difference < 0 else 1
+        if previous_ordering is None:
+            previous_ordering = ordering
+            continue
+
+        if previous_ordering != ordering:
             return False
 
     return True
@@ -43,12 +45,29 @@ def count_safe_reports(reports: list[Report]) -> int:
     return count
 
 
+def count_safe_reports_with_tolerate(reports: list[Report]) -> int:
+    count = 0
+
+    for report in reports:
+        variants = [report]
+
+        for i in range(len(report)):
+            # new variant without the given number
+            variants.append([*report[:i], *report[i + 1 :]])
+
+        if any(is_report_safe(report) for report in variants):
+            count += 1
+
+    return count
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2024/day/2"""
 
     data = read_input("2.txt")
 
     print(count_safe_reports(data))
+    print(count_safe_reports_with_tolerate(data))
 
 
 if __name__ == "__main__":
