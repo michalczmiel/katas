@@ -48,19 +48,19 @@ def rotate_direction(direction: tuple[int, int]) -> tuple[int, int]:
     return direction_rotation_mapping[direction]
 
 
-def count_visited_positions(lab_map: LabMap) -> int:
+def walk(lab_map: LabMap) -> list:
+    path = []
     direction = (0, -1)
-    visited = set()
     current = find_start_position(lab_map)
 
     while True:
-        visited.add(current)
+        path.append(current)
 
         next_position = get_next_position(current, direction)
 
         next_element = lab_map.get(next_position)
         if next_element is None:
-            return len(visited)
+            return path
 
         while next_element == OBSTRUCTION:
             direction = rotate_direction(direction)
@@ -70,11 +70,67 @@ def count_visited_positions(lab_map: LabMap) -> int:
         current = next_position
 
 
+def check_if_loop(lab_map: LabMap) -> bool:
+    direction = (0, -1)
+    current = find_start_position(lab_map)
+
+    visited = set()
+
+    while True:
+        if current is None:
+            return False
+
+        x, y = current
+        if (x, y, direction) in visited:
+            return True
+
+        visited.add((x, y, direction))
+
+        next_position = get_next_position(current, direction)
+
+        next_element = lab_map.get(next_position)
+        if next_element is None:
+            return False
+
+        while next_element == OBSTRUCTION:
+            direction = rotate_direction(direction)
+            next_position = get_next_position(current, direction)
+            next_element = lab_map.get(next_position)
+
+        current = next_position
+
+
+def count_visited_positions(lab_map: LabMap) -> int:
+    path = walk(lab_map)
+
+    return len(set(path))
+
+
+def count_possible_obstructions(lab_map: LabMap) -> int:
+    path = walk(lab_map)
+
+    count = 0
+    for i, position in enumerate(set(path)):
+        if i == 0:
+            continue
+
+        original_value = lab_map[position]
+        lab_map[position] = OBSTRUCTION
+
+        if check_if_loop(lab_map):
+            count += 1
+
+        lab_map[position] = original_value
+
+    return count
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2024/day/6"""
 
     lab_map = read_input("6.txt")
     print(count_visited_positions(lab_map))
+    print(count_possible_obstructions(lab_map))
 
 
 if __name__ == "__main__":
