@@ -70,10 +70,9 @@ def walk(lab_map: LabMap) -> list:
         current = next_position
 
 
-def check_if_loop(lab_map: LabMap) -> bool:
+def check_if_loop(lab_map: LabMap, start: tuple[int, int]) -> bool:
     direction = (0, -1)
-    current = find_start_position(lab_map)
-
+    current = start
     visited = set()
 
     while True:
@@ -108,16 +107,17 @@ def count_visited_positions(lab_map: LabMap) -> int:
 
 def count_possible_obstructions(lab_map: LabMap) -> int:
     path = walk(lab_map)
+    unique_path = list(dict.fromkeys(path))
 
     count = 0
-    for i, position in enumerate(set(path)):
-        if i == 0:
-            continue
+    start = unique_path[0]
 
+    for position in unique_path:
         original_value = lab_map[position]
+
         lab_map[position] = OBSTRUCTION
 
-        if check_if_loop(lab_map):
+        if check_if_loop(lab_map, start):
             count += 1
 
         lab_map[position] = original_value
