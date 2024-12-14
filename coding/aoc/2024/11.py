@@ -1,3 +1,6 @@
+import collections
+
+
 def read_input(file_name: str) -> list[int]:
     with open(file_name) as file:
         return [int(number) for number in file.read().strip().split(" ")]
@@ -18,34 +21,43 @@ def split_even_digit_number(number: int) -> tuple[int, int] | None:
     return (first, second)
 
 
-def simulate_stones(initial: list[int], blinks: int) -> list[int]:
-    processing = initial
+def get_stones_count(initial: list[int], blinks: int) -> list[int]:
+    stone_count = collections.defaultdict(int)
+
+    for number in initial:
+        stone_count[number] = 1
 
     for _ in range(blinks):
-        updated = []
+        updated_count = stone_count.copy()
 
-        for number in processing:
-            if number == 0:
-                updated.append(1)
+        for number, count in stone_count.items():
+            if count == 0:
                 continue
 
-            splitted_number = split_even_digit_number(number)
-            if splitted_number is None:
-                updated.append(number * 2024)
+            if number == 0:
+                updated_count[1] += count
             else:
-                updated.append(splitted_number[0])
-                updated.append(splitted_number[1])
+                splitted = split_even_digit_number(number)
+                if splitted is None:
+                    updated_count[number * 2024] += count
+                else:
+                    first, second = splitted
+                    updated_count[first] += count
+                    updated_count[second] += count
 
-        processing = updated
+            updated_count[number] -= count
 
-    return processing
+        stone_count = updated_count
+
+    return sum(stone_count.values())
 
 
 def solution() -> None:
     """Solution to https://adventofcode.com/2024/day/11"""
 
     data = read_input("11.txt")
-    print(len(simulate_stones(data, blinks=25)))
+    print(get_stones_count(data, blinks=25))
+    print(get_stones_count(data, blinks=75))
 
 
 if __name__ == "__main__":
