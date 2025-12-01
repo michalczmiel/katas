@@ -1,11 +1,15 @@
+from typing import NewType
+
 LEFT = "L"
 RIGHT = "R"
 
 DIAL_MAX = 100
 DIAL_MIN = 0
 
+Rotation = NewType("Rotation", tuple[str, int])
 
-def read_input(file_name: str) -> list[tuple[str, int]]:
+
+def read_input(file_name: str) -> list[Rotation]:
     lines = []
     with open(file_name) as file:
         for line in file:
@@ -32,25 +36,54 @@ def rotate_dial(current_position: int, direction: str, distance: int) -> int:
     0
     """
 
-    # handle values that "loop" around the dial
-    target_dial = distance % DIAL_MAX
+    new_position = (
+        current_position + distance
+        if direction == RIGHT
+        else current_position - distance
+    )
 
-    if direction == RIGHT:
-        return (current_position + target_dial) % DIAL_MAX
+    return new_position % DIAL_MAX
 
-    new_position = current_position - target_dial
-    if new_position < 0:
-        return DIAL_MAX + new_position
 
-    return new_position
+def count_dial_point(
+    current_position: int, direction: str, distance: int, target_dial=0
+) -> tuple[int, int]:
+    """
+    Checks if during rotation the dial pointed at 0
+
+    >>> count_dial_point(50, "L", 68)
+    (1, 82)
+    >>> count_dial_point(95, "R", 55)
+    (1, 50)
+    >>> count_dial_point(50, "R", 1000)
+    (10, 50)
+
+    """
+
+    count = 0
+
+    new_position = current_position
+
+    for i in range(distance):
+        if direction == LEFT:
+            new_position -= 1
+        else:
+            new_position += 1
+
+        new_position = new_position % DIAL_MAX
+
+        if new_position == target_dial:
+            count += 1
+
+    return count, new_position
 
 
 def count_dials_pointing_at(
-    passwords: list[tuple], dial: int, current_position=50
+    rotations: list[Rotation], dial: int, current_position=50
 ) -> int:
     zero_count = 0
 
-    for direction, distance in passwords:
+    for direction, distance in rotations:
         new_position = rotate_dial(current_position, direction, distance)
 
         if new_position == 0:
@@ -60,10 +93,28 @@ def count_dials_pointing_at(
     return zero_count
 
 
+def second_count_dials_pointing_at(
+    rotations: list[Rotation], dial: int, current_position=50
+) -> int:
+    zero_count = 0
+
+    for direction, distance in rotations:
+        count, new_position = count_dial_point(current_position, direction, distance)
+
+        zero_count += count
+
+        current_position = new_position
+
+    return zero_count
+
+
 def solution() -> None:
     """Solution to https://adventofcode.com/2025/day/1"""
 
-    print(count_dials_pointing_at(read_input("01.txt"), dial=0))
+    rotations = read_input("01.txt")
+
+    print(count_dials_pointing_at(rotations, dial=0))
+    print(second_count_dials_pointing_at(rotations, dial=0))
 
 
 if __name__ == "__main__":
