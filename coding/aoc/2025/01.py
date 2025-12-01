@@ -1,6 +1,9 @@
 LEFT = "L"
 RIGHT = "R"
 
+DIAL_MAX = 100
+DIAL_MIN = 0
+
 
 def read_input(file_name: str) -> list[tuple[str, int]]:
     lines = []
@@ -9,11 +12,11 @@ def read_input(file_name: str) -> list[tuple[str, int]]:
             direction, *rotation = list(line.strip())
             rotation = "".join(rotation)
 
-            lines.append((direction, rotation))
+            lines.append((direction, int(rotation)))
     return lines
 
 
-def rotate_dial(current_position: int, direction: str, value: int) -> int:
+def rotate_dial(current_position: int, direction: str, distance: int) -> int:
     """
     Rotates the dial left or right and returns new position
 
@@ -29,17 +32,38 @@ def rotate_dial(current_position: int, direction: str, value: int) -> int:
     0
     """
 
-    return -1
+    # handle values that "loop" around the dial
+    target_dial = distance % DIAL_MAX
+
+    if direction == RIGHT:
+        return (current_position + target_dial) % DIAL_MAX
+
+    new_position = current_position - target_dial
+    if new_position < 0:
+        return DIAL_MAX + new_position
+
+    return new_position
 
 
-def count_dials_pointing_at(passwords: list[str], dial: int) -> int:
-    return 0
+def count_dials_pointing_at(
+    passwords: list[tuple], dial: int, current_position=50
+) -> int:
+    zero_count = 0
+
+    for direction, distance in passwords:
+        new_position = rotate_dial(current_position, direction, distance)
+
+        if new_position == 0:
+            zero_count += 1
+        current_position = new_position
+
+    return zero_count
 
 
 def solution() -> None:
     """Solution to https://adventofcode.com/2025/day/1"""
 
-    print(count_dials_pointing_at(read_input("01-small.txt"), dial=0))
+    print(count_dials_pointing_at(read_input("01.txt"), dial=0))
 
 
 if __name__ == "__main__":
